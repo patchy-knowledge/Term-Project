@@ -15,20 +15,6 @@ class generic:
         self.y+=magnitude
 
 #get functions
-    def getHealth(self):
-        return self.health
-    
-    def getRadius(self):
-        return self.radius
-
-    def getPos(self):
-        return(self.x,self.y)
-    
-    def getSpeed(self):
-        return self.speed
-#used for damage, powerup, etc.
-    def modHealth(self,i):
-        self.health+=i
 
 class Player(generic):
     #type of shotPattern and spellPattern should be int
@@ -64,39 +50,6 @@ class bullet:
     
     def unFreeze(self):
         self.freeze=False
-    #getter functions
-    def getPos(self):
-        return(self.x,self.y)
-    
-    def getSpeed(self):
-        return self.speed
-    
-    def getDirection(self):
-        return self.direction
-    
-    def getDamage(self):
-        return self.damage
-    
-    def getRadius(self):
-        return self.radius
-    
-    def getLifetime(self):
-        return self.lifetime
-    
-    def getAge(self):
-        return self.age
-    
-    def isFrozen(self):
-        return self.freeze
-    
-    def setDirection(self,newDir):
-        self.direction=newDir
-    
-    def setSpeed(self,newSpeed):
-        self.speed=newSpeed
-    
-    def age(self,t):
-        self.age+=t
 
 class playerShot(bullet):
     pass

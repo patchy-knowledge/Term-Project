@@ -39,8 +39,8 @@ Algorithmic Plan:
 Timeline (tentative):
 Until November 17: review for midterms
 -November 18 (Friday): finish constructing classes of interactable objects
--November 19 (Saturday): collision detection, graze detection, score tracking
--November 20 (Sunday): basic graphics (necessary for basic game functions)
+-November 19 (Saturday): basic graphics (necessary for basic game functions)
+-November 20 (Sunday): collision detection, graze detection, score tracking 
 TP1 November 20
 -November 22 (Tuesday): Bullet generation functions (probably not final, will add more patterns when I work along)
 -November 24 (Thursday): implement basic game mode with stages
@@ -56,3 +56,4 @@ using Git, image attached in zip
 Other modules (after TP2):
 -Pygame (audio)
 -PyTorch (autoplay AI)
+
