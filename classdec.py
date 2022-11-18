@@ -7,14 +7,13 @@ class generic:
         self.x=x
         self.y=y
         self.radius=radius
+        self.isInvincible=False
 #performs a move in specified distance
     def moveX(self,magnitude):
         self.x+=magnitude
     
     def moveY(self,magnitude):
         self.y+=magnitude
-
-#get functions
 
 class Player(generic):
     #type of shotPattern and spellPattern should be int
@@ -44,6 +43,7 @@ class bullet:
         self.lifetime=lifetime
         self.freeze=False
         self.age=0
+        self.grazed=False
     
     def freeze(self):
         self.freeze=True
