@@ -4,10 +4,11 @@ from bullet import *
 from helper import *
 
 def appStarted(app):
+    app.timerDelay=10
     #tentative, test only!!!!
     app.character=Player(10,"Yuyuko",app.width/2,app.height-10,10,1,1)
     app.isFocus=False
-    testBullet(app.width/2,10,10,90,5,114514,1919810)
+    testBullet(app.width/2,10,2,90,5,114514,1919810)
     
 def redrawAll(app,canvas):
     canvas.create_oval(app.character.x-0.5*app.character.radius,app.character.y-0.5*app.character.radius,
@@ -45,9 +46,10 @@ def timerFired(app):
         dx,dy=polar2cart(bullet.direction,bullet.speed)
         bullet.x+=dx
         bullet.y+=dy
-
+        
     if checkCollision(app.character):
         print("collision detected")
+        bulletList.remove(bullet)
 
 runApp(height=600,width=600)
     
