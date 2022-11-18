@@ -7,7 +7,7 @@ def appStarted(app):
     #tentative, test only!!!!
     app.character=Player(10,"Yuyuko",app.width/2,app.height-10,10,1,1)
     app.isFocus=False
-    testBullet(app.width/2,10,10,180,5,114514,1919810)
+    testBullet(app.width/2,10,10,90,5,114514,1919810)
     
 def redrawAll(app,canvas):
     canvas.create_oval(app.character.x-0.5*app.character.radius,app.character.y-0.5*app.character.radius,
@@ -41,6 +41,13 @@ def keyPressed(app,event):
             app.character.moveX(app.character.speed)
 
 def timerFired(app):
-    pass
+    for bullet in bulletList:
+        dx,dy=polar2cart(bullet.direction,bullet.speed)
+        bullet.x+=dx
+        bullet.y+=dy
+
+    if checkCollision(app.character):
+        print("collision detected")
+
 runApp(height=600,width=600)
     
