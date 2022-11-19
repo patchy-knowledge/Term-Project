@@ -23,6 +23,10 @@ class Player(generic):
         self.name=name
         self.shotPattern=shotPattern
         self.spellPattern=spellPattern
+        self.timer=0
+        self.canTrack=False
+        self.power=1
+        self.isFiring=False
 
 class Enemy(generic):
     #enemies do not have spells
@@ -52,7 +56,7 @@ class bullet:
 
 class playerShot(bullet):
     def __init__(self,x,y,speed,direction,radius,damage,lifetime,tracking):
-        super().init(self,x,y,speed,direction,radius,damage,lifetime)
+        super().__init__(x,y,speed,direction,radius,damage,lifetime)
         self.tracking=tracking
 
 class enemyShot(bullet):
@@ -70,3 +74,11 @@ class circularTerrain:
         self.x=x
         self.y=y
         self.r=r
+
+class powerup:
+    def __init__(self,x,y,speed,r,powertype):
+        self.x=x
+        self.y=y
+        self.speed=speed
+        self.r=r
+        self.type=powertype

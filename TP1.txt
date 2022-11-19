@@ -1,0 +1,62 @@
+Touhou 15.112 - Python Bugs in Limbo -
+
+TP0 Design Documents
+
+Project Description:
+-Bullet Hell game inspired by Touhou Project with various bullet patterns, customizable difficulty, various power-ups, and possibly a pathfinding AI implemented in later stages. A separate "endurance" mode where the player tries to survive under increasing difficulty will also be implemented.
+In the original Touhou bullet hell games, more power-ups were implemented in the latest release (TH18.5) but that game is simply a mess in terms of basic playability as a bullet hell game, so I decide to make something similar but more playable.
+
+Similar Projects:
+1. Touhou Danmakufu (東方弾幕風)
+-Danmakufu is a well-developed standalone engine allowing players to create their own Touhou-style games. However, Danmakufu's Player class was built in such a way that in-game items such as power-ups cannot change the player's own "bomb" pattern or ordinary "shot" pattern. Also, player invincibility can only be obtained using bombs, but in my project I would like to implement power-up items that grant invincibility.
+The attributes of character and shot objects in my project will largely be similar to those in Danmakufu, but possibly with some removed or added for technical purposes.
+
+2. Unity Bullet Hell
+-This is an efficient projectile and particle generator based on Unity for 2D bullet hell games, but mainly focuses on optimizing rendering efficiency instead of physical mechanics.
+
+Structural Plan:
+-Files:
+--1. Basic math functions (convert between polar and cartesian coordinates, calculating distances, etc.)
+--2. Classes for interactable objects
+       --Generic (attributes of characters, regardless of type)
+       --Player and Enemy (inherit Generic, with their own attributes added)
+       --Shot (attributes of bullets, regardless of origin)
+       --Player and Enemy bullets (inherit Shot. The reason I will split the classes is because the program won't have to check for collisions between characters and their own bullets. Player bullets cannot be "grazed" either)
+       --Powerup (attributes of power-up items)
+       --Classes for different power-up items
+--3. Bullet generation functions, collision detection, graze detection, score tracking
+--4. Implementation for different game modes/stages
+--5. File that runs the game
+
+Algorithmic Plan:
+-Bullet storage: using two lists storing player and enemy bullets respectively will be fine since the game will not be checking for membership in this list. 
+-Check for collsion: all characters and bullets will have circular hitboxes so a quick check for distance will work. After collsion the bullet object is removed from its list, and for player bullets hitting enemies, score is added.
+-Check for graze: all enemy bullets have "isGrazed" boolean attribute which defaults to False, and changes to True if it comes within a certain distance of the player *without colliding*. The corresponding graze score can be subtracted off again if the bullet collides with the player, but I am also thinking of more "elegant" ways to do it.
+-Invincibility: to speed things up, collision check between player and enemy bullets will be disabled while the player is invincible.
+-Bullet cleanup: depending on its efficiency, this function may not be called for every timerFired(). Removes bullets that are heading away from players and enemies
+-Target tracking: update the path angle of the bullet once every few milliseconds so the bullet's path is always pointing at the target.
+
+Timeline (tentative):
+Until November 17: review for midterms (Done)
+-November 18 (Friday): finish constructing classes of interactable objects (Done)
+-November 19 (Saturday): basic graphics (necessary for basic game functions) (Done)
+-November 20 (Sunday): collision detection, graze detection, score tracking
+TP1 November 20
+-November 22 (Tuesday): Bullet generation functions (probably not final, will add more patterns when I work along) (Done)
+-November 24 (Thursday): implement basic game mode with stages, topscrolling
+-November 26 (Saturday): implement extra modes
+-November 28 (Monday): finalize interface design
+-November 29 (Tuesday): aesthestics
+TP2 November 30
+-After TP2: designing AI, extra stuff, etc.
+
+Version control:
+using Git, image attached in zip
+
+Other modules (after TP2):
+-Pygame (audio)
+-PyTorch (autoplay AI)
+
+TP1 Changelog:
+-Added topscrolling as feature
+

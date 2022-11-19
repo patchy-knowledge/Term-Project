@@ -24,10 +24,15 @@ def redrawAll(app,canvas):
             canvas.create_oval(terrain.x-terrain.r,terrain.y-terrain.r,
             terrain.x+terrain.r,terrain.y+terrain.r,fill="white",outline="black")
     for bullet in bulletList:
-            canvas.create_oval(bullet.x-bullet.radius,bullet.y-bullet.radius,
-            bullet.x+bullet.radius,bullet.y+bullet.radius,fill="yellow")
+        canvas.create_oval(bullet.x-bullet.radius,bullet.y-bullet.radius,
+        bullet.x+bullet.radius,bullet.y+bullet.radius,fill="yellow")
+    for playerBullet in playerBulletList:
+        canvas.create_oval(playerBullet.x-playerBullet.radius,playerBullet.y-playerBullet.radius,
+        playerBullet.x+playerBullet.radius,playerBullet.y+playerBullet.radius,fill="red")
 
 def keyPressed(app,event):
+    if event.key=="Space":
+        app.character.isFiring=not app.character.isFiring
     if event.key=="z":
         app.isFocus=not app.isFocus
     if event.key=="Up" and app.character.y>=10 and checkTerrain(app.character)!=4:
@@ -57,6 +62,8 @@ def keyPressed(app,event):
         pattern1(500,50,10,8,2,1,100,5)
         
 def timerFired(app):
+    if app.character.isFiring:
+        firePlayerBullet(app.character,False)
     for bullet in bulletList:
         if not bullet.freeze:
             dx,dy=polar2cart(bullet.direction,bullet.speed)
@@ -67,6 +74,12 @@ def timerFired(app):
         if checkGraze(app.character,bullet) and not bullet.grazed:
             print("Graze Detected")
             bullet.grazed=True
+    for playerBullet in playerBulletList:
+        if not playerBullet.tracking:
+            dx,dy=polar2cart(playerBullet.direction,playerBullet.speed)
+            playerBullet.x+=dx
+            playerBullet.y+=dy
+
     clean(app) 
 
 runApp(height=600,width=600)
