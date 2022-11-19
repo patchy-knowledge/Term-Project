@@ -16,6 +16,11 @@ def checkCollision(character,bullet):
         return True
     return False
 
+def checkGraze(character,bullet):
+    if character.radius+bullet.radius<distance(character.x,character.y,bullet.x,bullet.y)<=character.radius+bullet.radius+10:
+        return True
+    return False
+
 def clean(app):
     for bullet in bulletList:
         if bullet.x>app.width or bullet.x<0 or bullet.y<0 or bullet.y>app.height:
