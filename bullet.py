@@ -3,7 +3,9 @@ from cmu_112_graphics import *
 from helper import *
 
 bulletList=[]
+playerBulletList=[]
 
+#test function for bullet
 def testBullet(x,y,speed,direction,radius,damage,lifetime):
     bulletList.append(bullet(x,y,speed,direction,radius,damage,lifetime))
 

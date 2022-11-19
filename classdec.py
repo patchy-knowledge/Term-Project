@@ -32,7 +32,6 @@ class Enemy(generic):
         self.shotPattern=shotPattern
 
 class bullet:
-    #direction is specified as angle in degrees: up/down=0/180, horizontal left/right=-+90
     def __init__(self,x,y,speed,direction,radius,damage,lifetime):
         self.x=x
         self.y=y
@@ -52,7 +51,22 @@ class bullet:
         self.freeze=False
 
 class playerShot(bullet):
-    pass
+    def __init__(self,x,y,speed,direction,radius,damage,lifetime,tracking):
+        super().init(self,x,y,speed,direction,radius,damage,lifetime)
+        self.tracking=tracking
 
 class enemyShot(bullet):
     pass
+
+class rectTerrain:
+    def __init__(self,x1,y1,x2,y2):
+        self.x1=x1
+        self.x2=x2
+        self.y1=y1
+        self.y2=y2
+
+class circularTerrain:
+    def __init__(self,x,y,r):
+        self.x=x
+        self.y=y
+        self.r=r
