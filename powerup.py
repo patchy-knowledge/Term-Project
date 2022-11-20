@@ -1,9 +1,7 @@
 from helper import *
 from classdec import *
 
-powerupList=[]
-
-def checkPowerupPickup(character,powerup):
+def checkPowerupPickup(character,powerup,powerupList):
     if distance(character.x,character.y,powerup.x,powerup.y)<=20+character.radius+powerup.r:
         powerupList.remove(powerup)
         if powerup.type=="invincible":
@@ -12,3 +10,5 @@ def checkPowerupPickup(character,powerup):
             character.timer=15000
         if powerup.type=="track":
             character.canTrack=True
+        if powerup.type=="power":
+            character.power+=1

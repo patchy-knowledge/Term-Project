@@ -1,14 +1,12 @@
 from classdec import *
 from helper import *
 
-terrainList=[]
-
-def testRectTerrain(x1,y1,x2,y2):
+def testRectTerrain(x1,y1,x2,y2,terrainList):
     terrainList.append(rectTerrain(x1,y1,x2,y2))
-def testCircularTerrain(x,y,r):
+def testCircularTerrain(x,y,r,terrainList):
     terrainList.append(circularTerrain(x,y,r))
 
-def checkTerrain(character):
+def checkTerrain(character,terrainList):
     #return values: 1 if character is on terrain's left edge, 2 if on right edge, 3 if on top edge, 4 if on bottom edge
     #return 0 if not in contact with terrain
     for terrain in terrainList:
