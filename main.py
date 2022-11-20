@@ -10,7 +10,7 @@ def appStarted(app):
     app.character=Player(10,"Yuyuko",app.width/2,app.height-10,5,1,1)
     app.isFocus=False
     testBullet(app.width/2,10,2,90,5,1,1919810)
-    testRectTerrain(250,250,350,350)
+    testCircularTerrain(300,300,50)
     
 def redrawAll(app,canvas):
     canvas.create_oval(app.character.x-app.character.radius,app.character.y-app.character.radius,

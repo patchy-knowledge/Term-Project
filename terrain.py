@@ -22,13 +22,19 @@ def checkTerrain(character):
             elif delta(terrain.y2,character.y)<=5 and terrain.x1<=character.x<=terrain.x2:
                 return 4
         #not done yet
-        """elif isinstance(terrain,circularTerrain):
+        elif isinstance(terrain,circularTerrain):
             dx=character.x-terrain.x
             dy=character.y-terrain.y
             dist=distance(character.x,character.y,terrain.x,terrain.y)
             mindist=character.radius+terrain.r
-            if -45<=cart2polar(dx,dy)<45 and dist<=mindist:
+            theta=cart2polar(dx,dy)[0]
+            if -45<theta<45 and dist<=mindist and dx>0:
                 return 2
-            elif """
+            elif -45<theta<45 and dist<=mindist and dx<0:
+                return 1
+            elif abs(theta)>=45 and dist<=mindist and dy<0:
+                return 3
+            elif abs(theta)>=45 and dist<=mindist and dy>0:
+                return 4
     return 0
 
