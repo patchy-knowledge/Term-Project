@@ -13,7 +13,7 @@ def appStarted(app):
     app.powerupList=[]
     app.terrainList=[]
     #tentative, test only!!!!
-    app.character=Player(10,"Yuyuko",app.width/2,app.height-10,5,1,1)
+    app.character=Player(3,"Yuyuko",app.width/2,app.height-10,5,1,1)
     app.isFocus=False
     app.enemy=Enemy(5,"Reimu",114514,app.width/2,10,30,1)
     testBullet(app.width/2,10,2,90,5,1,1919810,app.bulletList)
@@ -21,6 +21,33 @@ def appStarted(app):
     app.mode="Start"
     app.cleared=True
     app.scroll=0
+    app.keyHoldDict=dict()
+    app.keyHoldDict["Up"]=False
+    app.keyHoldDict["Down"]=False
+    app.keyHoldDict["Left"]=False
+    app.keyHoldDict["Right"]=False
+
+def checkMovements(app):
+    if app.keyHoldDict["Up"] and checkTerrain(app.character,app.terrainList) not in (4,5,7):
+        if app.isFocus:
+            app.character.y-=0.2*app.character.speed
+        else:
+            app.character.y-=app.character.speed
+    if app.keyHoldDict["Down"] and checkTerrain(app.character,app.terrainList) not in (3,6,8):
+        if app.isFocus:
+            app.character.y+=0.2*app.character.speed
+        else:
+            app.character.y+=app.character.speed
+    if app.keyHoldDict["Left"] and checkTerrain(app.character,app.terrainList) not in (2,5,6):
+        if app.isFocus:
+            app.character.x-=0.2*app.character.speed
+        else:
+            app.character.x-=app.character.speed
+    if app.keyHoldDict["Right"] and checkTerrain(app.character,app.terrainList) not in (1,7,8):
+        if app.isFocus:
+            app.character.x+=0.2*app.character.speed
+        else:
+            app.character.x+=app.character.speed
 
 def drawPowerups(app,canvas):
     for powerup in app.powerUpList:
@@ -54,26 +81,12 @@ def Game_keyPressed(app,event):
         app.character.isFiring=not app.character.isFiring
     if event.key=="z":
         app.isFocus=not app.isFocus
-    if event.key=="Up" and app.character.y>=10 and checkTerrain(app.character,app.terrainList) not in (4,5,7):
-        if app.isFocus:
-            app.character.moveY(-1*app.character.speed/5)
-        else:
-            app.character.moveY(-1*app.character.speed)
-    if event.key=="Down" and app.character.y<=app.height-10 and checkTerrain(app.character,app.terrainList) not in (3,6,8):
-        if app.isFocus:
-            app.character.moveY(app.character.speed/5)
-        else:
-            app.character.moveY(app.character.speed)
-    if event.key=="Left" and app.character.x>=10 and checkTerrain(app.character,app.terrainList) not in (2,5,6):
-        if app.isFocus:
-            app.character.moveX(-1*app.character.speed/5)
-        else:
-            app.character.moveX(-1*app.character.speed)
-    if event.key=="Right" and app.character.x<=app.width-10 and checkTerrain(app.character,app.terrainList) not in (1,7,8):
-        if app.isFocus:
-            app.character.moveX(app.character.speed/5)
-        else:
-            app.character.moveX(app.character.speed)
+    if event.key in ("Up","Down","Left","Right"):
+        app.keyHoldDict[event.key]=True
+
+def Game_keyReleased(app,event):
+    if event.key in ("Up","Down","Left","Right"):
+        app.keyHoldDict[event.key]=False
     #test bullet pattern
     if event.key=="1":
         pattern1(300,50,10,8,2,1,100,0,app.bulletList)
@@ -81,6 +94,7 @@ def Game_keyPressed(app,event):
         pattern1(500,50,10,8,2,1,100,5,app.bulletList)
         
 def Game_timerFired(app):
+    checkMovements(app)
     if app.character.isFiring:
         firePlayerBullet(app.character,True,app.playerBulletList)
     for bullet in app.bulletList:
