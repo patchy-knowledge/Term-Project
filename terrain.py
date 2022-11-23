@@ -8,6 +8,7 @@ def testCircularTerrain(x,y,r,terrainList):
 
 def checkTerrain(character,terrainList):
     #return values: 1 if character is on terrain's left edge, 2 if on right edge, 3 if on top edge, 4 if on bottom edge
+    #circular terrain: 5 for lower-right, 6 for upper-right, 7 for lower-left, 8 for upper-left
     #return 0 if not in contact with terrain
     for terrain in terrainList:
         if isinstance(terrain,rectTerrain):
@@ -19,20 +20,35 @@ def checkTerrain(character,terrainList):
                 return 3
             elif delta(terrain.y2,character.y)<=5 and terrain.x1<=character.x<=terrain.x2:
                 return 4
-        #not done yet
-        elif isinstance(terrain,circularTerrain):
+        if isinstance(terrain,circularTerrain):
             dx=character.x-terrain.x
             dy=character.y-terrain.y
             dist=distance(character.x,character.y,terrain.x,terrain.y)
             mindist=character.radius+terrain.r
-            theta=cart2polar(dx,dy)[0]
-            if -45<theta<45 and dist<=mindist and dx>0:
-                return 2
-            elif -45<theta<45 and dist<=mindist and dx<0:
-                return 1
-            elif abs(theta)>=45 and dist<=mindist and dy<0:
-                return 3
-            elif abs(theta)>=45 and dist<=mindist and dy>0:
+            if dx>0 and dy>0 and dist<mindist:
+                return 5
+            elif dx>0 and dy<0 and dist<mindist:
+                return 6
+            elif dx<0 and dy>0 and dist<mindist:
+                return 7
+            elif dx<0 and dy<0 and dist<mindist:
+                return 8
+            elif dx==0 and dy>0 and dist<mindist:
                 return 4
+            elif dx==0 and dy<0 and dist<mindist:
+                return 3
+            elif dx>0 and dy==0 and dist<mindist:
+                return 2
+            elif dx<0 and dy==0 and dist<mindist:
+                return 1
     return 0
+
+def drawTerrain(app,canvas):
+    for terrain in app.terrainList:
+        if isinstance(terrain,rectTerrain):
+            canvas.create_rectangle(terrain.x1,terrain.y1,terrain.x2,terrain.y2,
+            fill="white",outline="black")
+        elif isinstance(terrain,circularTerrain):
+            canvas.create_oval(terrain.x-terrain.r,terrain.y-terrain.r,
+            terrain.x+terrain.r,terrain.y+terrain.r,fill="white",outline="black")
 

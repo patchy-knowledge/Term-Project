@@ -47,3 +47,10 @@ def pattern1(x,y,density,size,speed,damage,lifetime,offset,bulletList):
     for i in range(1,count):
         bulletList.append(bullet(x,y,speed,i*density+offset,size,damage,lifetime))
 
+def drawBullets(app,canvas):
+    for bullet in app.bulletList:
+        canvas.create_oval(bullet.x-bullet.radius,bullet.y-bullet.radius,
+        bullet.x+bullet.radius,bullet.y+bullet.radius,fill="yellow")
+    for playerBullet in app.playerBulletList:
+        canvas.create_oval(playerBullet.x-playerBullet.radius,playerBullet.y-playerBullet.radius,
+        playerBullet.x+playerBullet.radius,playerBullet.y+playerBullet.radius,fill="red")
