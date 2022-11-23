@@ -3,6 +3,7 @@ from classdec import *
 from bullet import *
 from helper import *
 from terrain import *
+from time import *
 
 def appStarted(app):
     app.timerDelay=10
@@ -17,6 +18,18 @@ def appStarted(app):
     app.enemy=Enemy(5,"Reimu",114514,app.width/2,10,30,1)
     testBullet(app.width/2,10,2,90,5,1,1919810,app.bulletList)
     testCircularTerrain(300,300,50,app.terrainList)
+    app.mode="Start"
+    app.cleared=True
+    app.scroll=0
+
+def drawPowerups(app,canvas):
+    for powerup in app.powerUpList:
+        if powerup.type=="invincible":
+            canvas.create_oval(powerup.x-10,powerup.y-10,powerup.x+10,powerup.y+10,fill="blue")
+        elif powerup.type=="power":
+            canvas.create_oval(powerup.x-10,powerup.y-10,powerup.x+10,powerup.y+10,fill="red")
+        elif powerup.type=="track":
+            canvas.create_oval(powerup.x-10,powerup.y-10,powerup.x+10,powerup.y+10,fill="purple")
 
 def drawCharacters(app,canvas):
     canvas.create_oval(app.character.x-app.character.radius,app.character.y-app.character.radius,
@@ -24,13 +37,19 @@ def drawCharacters(app,canvas):
     canvas.create_oval(app.enemy.x-app.enemy.radius,app.enemy.y-app.enemy.radius,
     app.enemy.x+app.enemy.radius,app.enemy.y+app.enemy.radius,fill="magenta")
 
-def redrawAll(app,canvas):
+def Start_redrawAll(app,canvas):
+    canvas.create_text(300,300,font="Helvetica", text="Press any key to start")
+
+def Start_keyPressed(app,event):
+    app.mode="Game"
+
+def Game_redrawAll(app,canvas):
     drawCharacters(app,canvas)
     canvas.create_text(300,50,font="Arial 26", text=app.enemy.health)
     drawTerrain(app,canvas)
     drawBullets(app,canvas)
 
-def keyPressed(app,event):
+def Game_keyPressed(app,event):
     if event.key=="Space":
         app.character.isFiring=not app.character.isFiring
     if event.key=="z":
@@ -61,7 +80,7 @@ def keyPressed(app,event):
         pattern1(100,50,10,8,2,1,100,5,app.bulletList)
         pattern1(500,50,10,8,2,1,100,5,app.bulletList)
         
-def timerFired(app):
+def Game_timerFired(app):
     if app.character.isFiring:
         firePlayerBullet(app.character,True,app.playerBulletList)
     for bullet in app.bulletList:

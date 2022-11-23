@@ -76,9 +76,9 @@ class circularTerrain:
         self.r=r
 
 class powerup:
-    def __init__(self,x,y,speed,r,powertype):
+    def __init__(self,x,y,speed,powertype):
         self.x=x
         self.y=y
         self.speed=speed
-        self.r=r
+        self.r=15
         self.type=powertype
