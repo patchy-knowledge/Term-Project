@@ -1,6 +1,7 @@
 from classdec import *
 from cmu_112_graphics import *
 from helper import *
+import time
 
 #test function for bullet
 def testBullet(x,y,speed,direction,radius,damage,lifetime,bulletList):
@@ -13,10 +14,11 @@ def checkCollision(character,bullet,bulletList):
         return True
     return False
 
-def checkEnemyCollision(enemy,pbullet,playerBulletList):
+def checkEnemyCollision(enemy,pbullet,playerBulletList,app):
     if distance(enemy.x,enemy.y,pbullet.x,pbullet.y)<=enemy.radius+pbullet.radius:
         playerBulletList.remove(pbullet)
         enemy.health-=pbullet.damage
+        app.score+=10
         return True
     return False
 
@@ -47,6 +49,15 @@ def pattern1(x,y,density,size,speed,damage,lifetime,offset,bulletList):
     for i in range(1,count):
         bulletList.append(bullet(x,y,speed,i*density+offset,size,damage,lifetime))
 
+def pattern2(duration,timeLapse,x,y,speed,direction,size,damage,lifetime,app):
+    count=duration//timeLapse
+    startTime=app.timePassed
+    for i in range(count):
+        while(app.timePassed<startTime+i*timeLapse):
+            print(app.timePassed)
+            pass
+        app.bulletList.append(bullet(x,y,speed,direction,size,damage,lifetime))
+        
 def drawBullets(app,canvas):
     for bullet in app.bulletList:
         canvas.create_oval(bullet.x-bullet.radius,bullet.y-bullet.radius,
