@@ -23,13 +23,13 @@ def checkEnemyCollision(enemy,pbullet,playerBulletList,app):
     return False
 
 def checkGraze(character,bullet):
-    if character.radius+bullet.radius<distance(character.x,character.y,bullet.x,bullet.y)<=character.radius+bullet.radius+10:
+    if character.radius+bullet.radius<distance(character.x,character.y,bullet.x,bullet.y)<=character.radius+bullet.radius+25:
         return True
     return False
 
 def clean(app,bulletList,playerBulletList):
     for bullet in bulletList:
-        if bullet.x>app.width or bullet.x<0 or bullet.y<0 or bullet.y>app.height:
+        if bullet.x>600-bullet.radius or bullet.x<0 or bullet.y<0 or bullet.y>600-bullet.radius:
             bulletList.remove(bullet)
     for playerBullet in playerBulletList:
         if playerBullet.x>app.width or playerBullet.x<0 or playerBullet.y<0 or playerBullet.y>app.height:
@@ -44,20 +44,19 @@ def firePlayerBullet(character,track,playerBulletList):
             playerBulletList.append(playerShot(character.x+i*10,character.y,10,-90,3,50,114514,track))
             playerBulletList.append(playerShot(character.x-i*10,character.y,10,-90,3,50,114514,track))
 
-def pattern1(x,y,density,size,speed,damage,lifetime,offset,bulletList):
+def pattern1(x,y,density,size,speed,damage,lifetime,offset,app):
     count=180//density
     for i in range(1,count):
-        bulletList.append(bullet(x,y,speed,i*density+offset,size,damage,lifetime))
+        app.bulletList.append(bullet(x,y,speed,i*density+offset,size,damage,lifetime))
 
-def pattern2(duration,timeLapse,x,y,speed,direction,size,damage,lifetime,app):
-    count=duration//timeLapse
-    startTime=app.timePassed
-    for i in range(count):
-        while(app.timePassed<startTime+i*timeLapse):
-            print(app.timePassed)
-            pass
+def pattern2(app,x,y,speed,direction,size,damage,lifetime,count,timeLapse):
+    app.pattern2count=count
+    if app.timePassed>app.pattern2start+timeLapse*app.pattern2gencount:
         app.bulletList.append(bullet(x,y,speed,direction,size,damage,lifetime))
-        
+        app.pattern2gencount+=1
+        if app.pattern2gencount>app.pattern2count-1:
+            app.pattern2gen=False
+
 def drawBullets(app,canvas):
     for bullet in app.bulletList:
         canvas.create_oval(bullet.x-bullet.radius,bullet.y-bullet.radius,

@@ -27,6 +27,7 @@ class Player(generic):
         self.canTrack=False
         self.power=1
         self.isFiring=False
+        self.isInvincible=False
 
 class Enemy(generic):
     #enemies do not have spells
