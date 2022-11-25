@@ -36,25 +36,26 @@ def clean(app,bulletList,playerBulletList):
             playerBulletList.remove(playerBullet)
 
 #test only
-def firePlayerBullet(character,track,playerBulletList):
-    for i in range(character.power):
+def firePlayerBullet(track,app):
+    for i in range(math.floor(app.character.power)):
         if i==0:
-            playerBulletList.append(playerShot(character.x,character.y,10,-90,3,50,114514,track))
+            app.playerBulletList.append(playerShot(app.character.x,app.character.y,10,-90,3,50,114514,track))
         else:
-            playerBulletList.append(playerShot(character.x+i*10,character.y,10,-90,3,50,114514,track))
-            playerBulletList.append(playerShot(character.x-i*10,character.y,10,-90,3,50,114514,track))
+            app.playerBulletList.append(playerShot(app.character.x+i*10,app.character.y,10,-90,3,50,114514,track))
+            app.playerBulletList.append(playerShot(app.character.x-i*10,app.character.y,10,-90,3,50,114514,track))
 
 def pattern1(x,y,density,size,speed,damage,lifetime,offset,app):
     count=180//density
     for i in range(1,count):
         app.bulletList.append(bullet(x,y,speed,i*density+offset,size,damage,lifetime))
 
-def pattern2(app,x,y,speed,direction,size,damage,lifetime,count,timeLapse):
+def pattern2(app,xyList,speed,direction,size,damage,lifetime,count,timeLapse):
     app.pattern2count=count
     if app.timePassed>app.pattern2start+timeLapse*app.pattern2gencount:
-        app.bulletList.append(bullet(x,y,speed,direction,size,damage,lifetime))
-        app.pattern2gencount+=1
-        if app.pattern2gencount>app.pattern2count-1:
+        for x,y in xyList:
+            app.bulletList.append(bullet(x,y,speed,direction,size,damage,lifetime))
+            app.pattern2gencount+=1
+        if app.pattern2gencount>app.pattern2count-len(xyList):
             app.pattern2gen=False
 
 def randomBullet(app,speed,size,damage,lifetime):
@@ -76,6 +77,16 @@ def randomBullet(app,speed,size,damage,lifetime):
         direction+=180
     app.bulletList.append(bullet(x,y,speed,direction,size,damage,lifetime))
 
+def bossBullet(app,speed,size,damage,lifetime):
+    dx=app.character.x-app.enemy.x
+    dy=app.character.y-app.enemy.y
+    if dx==0:
+        direction=-90
+    else:
+        direction=180/math.pi*math.atan(dy/dx)
+    if direction<0:
+        direction+=180
+    app.bulletList.append(bullet(app.enemy.x,app.enemy.y,speed,direction,size,damage,lifetime))
 def drawBullets(app,canvas):
     for bullet in app.bulletList:
         canvas.create_oval(bullet.x-bullet.radius,bullet.y-bullet.radius,

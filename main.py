@@ -21,7 +21,6 @@ def appStarted(app):
     app.cleared=True
     app.scroll=0
     app.enemy=None
-    app.enemy=Enemy(2,"Hakurei Reimu",11451,300,50,10,1)
     app.keyHoldDict=dict()
     app.keyHoldDict["Up"]=False
     app.keyHoldDict["Down"]=False
@@ -33,11 +32,12 @@ def appStarted(app):
     app.enemyImage=app.loadImage('Reimu_enemy.png')
     app.stageBackground=app.loadImage('Stage_Background_Alt.png')
     app.grazeCount=0
+    app.pattern2start=None
+    app.stage=1
 
 def checkMovements(app):
     cx=app.character.x
     cy=app.character.y
-    
     if app.keyHoldDict["Up"] and checkTerrain(app.character,app.terrainList) not in (4,5,7) and not cy<0:
         if app.isFocus:
             app.character.y-=0.2*app.character.speed
@@ -96,7 +96,7 @@ def enemyTick(app):
         elif app.enemy.y>100:
             if 100<app.enemy.x<500:
                 app.enemy.direction=190
-        newDir=random.randint(app.enemy.direction-5,zapp.enemy.direction+5)
+        newDir=random.randint(app.enemy.direction-5,app.enemy.direction+5)
         app.enemy.direction=newDir
         dx,dy=polar2cart(app.enemy.direction,app.enemy.speed)
         app.enemy.x+=dx
@@ -139,6 +139,36 @@ def drawCharacters(app,canvas):
         canvas.create_oval(app.enemy.x-app.enemy.radius,app.enemy.y-app.enemy.radius,
         app.enemy.x+app.enemy.radius,app.enemy.y+app.enemy.radius,fill="magenta")
 
+def stage1(app):
+    if app.timePassed<15000:
+        if app.timePassed%100==0:
+            randomBullet(app,4,5,1,114)
+    if 15000<=app.timePassed<=15050: 
+        app.enemy=Enemy(2,"Hakurei Reimu",114514,300,50,10,1)
+    if app.enemy is not None:
+        if app.timePassed%100==0:
+            bossBullet(app,3,5,5,114514)
+        if 20000<=app.timePassed<=23000:
+            if app.timePassed%600==0:
+                pattern1(app.enemy.x,app.enemy.y,5,5,2,1,1000,random.randint(-10,10),app)
+        if 23000<app.timePassed<30000:
+            if app.timePassed%75==0:
+                bossBullet(app,3,5,5,114514)
+        if 30000<=app.timePassed<=35000:
+            if app.pattern2start==None:
+                app.pattern2start=app.timePassed
+                app.pattern2gencount=0
+            app.xyList=[]
+            for i in range(10):
+                app.xyList.append((100+i*40+random.randint(-10,10),100+random.randint(-20,20)))
+            pattern2(app,app.xyList,5,90,5,1,114,100,50)
+    else:
+        app.stage=2
+        app.timePassed=0
+
+def stage2(app):
+    
+
 def Start_redrawAll(app,canvas):
     canvas.create_text(300,300,font="Helvetica", text="Press any key to start")
 
@@ -166,6 +196,7 @@ def Game_keyPressed(app,event):
         pattern1(100,50,10,8,2,1,100,5,app)
         pattern1(500,50,10,8,2,1,100,5,app)
     if event.key=="2":
+        app.xyList=[(100,100),(200,100),(300,100),(400,100),(500,100)]
         app.pattern2gen=True
         app.pattern2start=app.timePassed
         app.pattern2count=5
@@ -182,18 +213,13 @@ def Game_timerFired(app):
     if app.enemy is not None:
         enemyTick(app)
     if app.pattern2gen:
-        pattern2(app,300,100,5,90,5,1,114,10,200)
+        pattern2(app,app.xyList,5,90,5,1,114,100,50)
     checkMovements(app)
     if app.character.isFiring:
-        firePlayerBullet(app.character,True,app.playerBulletList)
+        firePlayerBullet(True,app)
     bulletTick(app)
     playerBulletTick(app)
     clean(app,app.bulletList,app.playerBulletList) 
-    '''if app.timePassed<3000:
-        if app.timePassed%100==0:
-            randomBullet(app,4,5,1,114)
-    if 3000<=app.timePassed<=3050: 
-        app.enemy=Enemy(2,"Hakurei Reimu",11451,300,50,10,1)
-    '''
+    stage1(app)
 runApp(height=600,width=800)
     
