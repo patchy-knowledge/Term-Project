@@ -35,6 +35,7 @@ class Enemy(generic):
         super().__init__(speed,health,x,y,radius)
         self.name=name
         self.shotPattern=shotPattern
+        self.direction=0
 
 class bullet:
     def __init__(self,x,y,speed,direction,radius,damage,lifetime):

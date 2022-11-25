@@ -68,7 +68,10 @@ def randomBullet(app,speed,size,damage,lifetime):
         y=random.randint(10,300)
         dx=app.character.x-x
         dy=app.character.y-y
-    direction=180/math.pi*math.atan(dy/dx)
+    if dx==0:
+        direction=-90
+    else: 
+        direction=180/math.pi*math.atan(dy/dx)
     if direction<0:
         direction+=180
     app.bulletList.append(bullet(x,y,speed,direction,size,damage,lifetime))

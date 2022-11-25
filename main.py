@@ -21,6 +21,7 @@ def appStarted(app):
     app.cleared=True
     app.scroll=0
     app.enemy=None
+    app.enemy=Enemy(2,"Hakurei Reimu",11451,300,50,10,1)
     app.keyHoldDict=dict()
     app.keyHoldDict["Up"]=False
     app.keyHoldDict["Down"]=False
@@ -70,6 +71,36 @@ def bulletTick(app):
         if checkGraze(app.character,Bullet) and not Bullet.grazed:
             Bullet.grazed=True
             app.grazeCount+=1
+
+def enemyTick(app):
+    if app.enemy.health<=0:
+        app.enemy=None
+    if app.enemy is not None:
+        if app.enemy.x<100:
+            if 10<app.enemy.y<100:
+                app.enemy.direction=80
+            elif app.enemy.y<10:
+                app.enemy.direction=45
+            else:
+                app.enemy.direction=-45
+        elif app.enemy.x>500:
+            if 10<app.enemy.y<100:
+                app.enemy.direction=100
+            elif app.enemy.y<10:
+                app.enemy.direction=135
+            else:
+                app.enemy.direction=-135
+        if app.enemy.y<10:
+            if 100<app.enemy.x<500:
+                app.enemy.direction=10
+        elif app.enemy.y>100:
+            if 100<app.enemy.x<500:
+                app.enemy.direction=190
+        newDir=random.randint(app.enemy.direction-5,zapp.enemy.direction+5)
+        app.enemy.direction=newDir
+        dx,dy=polar2cart(app.enemy.direction,app.enemy.speed)
+        app.enemy.x+=dx
+        app.enemy.y+=dy
 
 def playerBulletTick(app):
     for playerBullet in app.playerBulletList:
@@ -148,6 +179,8 @@ def Game_keyReleased(app,event):
         
 def Game_timerFired(app):
     app.timePassed+=app.timerDelay
+    if app.enemy is not None:
+        enemyTick(app)
     if app.pattern2gen:
         pattern2(app,300,100,5,90,5,1,114,10,200)
     checkMovements(app)
@@ -156,6 +189,11 @@ def Game_timerFired(app):
     bulletTick(app)
     playerBulletTick(app)
     clean(app,app.bulletList,app.playerBulletList) 
-
+    '''if app.timePassed<3000:
+        if app.timePassed%100==0:
+            randomBullet(app,4,5,1,114)
+    if 3000<=app.timePassed<=3050: 
+        app.enemy=Enemy(2,"Hakurei Reimu",11451,300,50,10,1)
+    '''
 runApp(height=600,width=800)
     
