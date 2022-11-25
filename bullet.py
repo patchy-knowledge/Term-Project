@@ -1,11 +1,11 @@
 from classdec import *
 from cmu_112_graphics import *
 from helper import *
-import time
+import random
 
 #test function for bullet
-def testBullet(x,y,speed,direction,radius,damage,lifetime,bulletList):
-    bulletList.append(bullet(x,y,speed,direction,radius,damage,lifetime))
+def testBullet(x,y,speed,direction,radius,damage,lifetime,app):
+    app.bulletList.append(bullet(x,y,speed,direction,radius,damage,lifetime))
 
 def checkCollision(character,bullet,bulletList):
     if distance(character.x,character.y,bullet.x,bullet.y)<=character.radius+bullet.radius:
@@ -56,6 +56,22 @@ def pattern2(app,x,y,speed,direction,size,damage,lifetime,count,timeLapse):
         app.pattern2gencount+=1
         if app.pattern2gencount>app.pattern2count-1:
             app.pattern2gen=False
+
+def randomBullet(app,speed,size,damage,lifetime):
+    x=random.randint(10,590)
+    y=random.randint(10,300)
+    dx=app.character.x-x
+    dy=app.character.y-y
+    #minimum generation distance from player is 150
+    while(distance(x,y,app.character.x,app.character.y)<150):
+        x=random.randint(10,590)
+        y=random.randint(10,300)
+        dx=app.character.x-x
+        dy=app.character.y-y
+    direction=180/math.pi*math.atan(dy/dx)
+    if direction<0:
+        direction+=180
+    app.bulletList.append(bullet(x,y,speed,direction,size,damage,lifetime))
 
 def drawBullets(app,canvas):
     for bullet in app.bulletList:

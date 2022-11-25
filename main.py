@@ -139,6 +139,8 @@ def Game_keyPressed(app,event):
         app.pattern2start=app.timePassed
         app.pattern2count=5
         app.pattern2gencount=0
+    if event.key=="3":
+        randomBullet(app,5,10,5,114)
         
 def Game_keyReleased(app,event):
     if event.key in ("Up","Down","Left","Right"):
