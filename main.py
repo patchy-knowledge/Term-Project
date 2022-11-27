@@ -33,7 +33,7 @@ def appStarted(app):
     app.stageBackground=app.loadImage('Stage_Background_Alt.png')
     app.grazeCount=0
     app.pattern2start=None
-    app.stage=1
+    app.stage=2
 
 def checkMovements(app):
     cx=app.character.x
@@ -140,34 +140,61 @@ def drawCharacters(app,canvas):
         app.enemy.x+app.enemy.radius,app.enemy.y+app.enemy.radius,fill="magenta")
 
 def stage1(app):
+    #to-do: load Reimu's bullet image
     if app.timePassed<15000:
         if app.timePassed%100==0:
-            randomBullet(app,4,5,1,114)
-    if 15000<=app.timePassed<=15050: 
-        app.enemy=Enemy(2,"Hakurei Reimu",114514,300,50,10,1)
-    if app.enemy is not None:
-        if app.timePassed%100==0:
-            bossBullet(app,3,5,5,114514)
-        if 20000<=app.timePassed<=23000:
-            if app.timePassed%600==0:
-                pattern1(app.enemy.x,app.enemy.y,5,5,2,1,1000,random.randint(-10,10),app)
-        if 23000<app.timePassed<30000:
-            if app.timePassed%75==0:
+            randomBullet(app,2,5,1,114)
+    elif 15000<=app.timePassed<=15050: 
+        app.enemy=Enemy(2,"Hakurei Reimu",191981,300,50,10)
+    elif app.timePassed>15050:
+        if app.enemy is not None:
+            if app.timePassed%100==0:
                 bossBullet(app,3,5,5,114514)
-        if 30000<=app.timePassed<=35000:
-            if app.pattern2start==None:
-                app.pattern2start=app.timePassed
-                app.pattern2gencount=0
-            app.xyList=[]
-            for i in range(10):
-                app.xyList.append((100+i*40+random.randint(-10,10),100+random.randint(-20,20)))
-            pattern2(app,app.xyList,5,90,5,1,114,100,50)
-    else:
-        app.stage=2
-        app.timePassed=0
+            if 20000<=app.timePassed<=23000:
+                if app.timePassed%600==0:
+                    pattern1(app.enemy.x,app.enemy.y,5,5,2,1,1000,random.randint(-10,10),app)
+            if 23000<app.timePassed<30000:
+                if app.timePassed%75==0:
+                    bossBullet(app,3,5,5,114514)
+            if 30000<=app.timePassed<=35000:
+                if app.pattern2start==None:
+                    app.pattern2start=app.timePassed
+                    app.pattern2gencount=0
+                    app.xyList=[]
+                    for i in range(10):
+                        app.xyList.append((100+i*40+random.randint(-10,10),100+random.randint(-20,20)))
+                pattern2(app,app.xyList,5,90,5,1,114,100,50)
+        else:
+            app.stage=2
+            app.timePassed=0
+            app.pattern2start=None
 
 def stage2(app):
-    
+    #to do: load Marisa's bullet image
+    #to do: modify drawEnemy
+    if app.timePassed<20000:
+        if app.timePassed%75==0:
+            randomBullet(app,4,3,10,114514)
+    elif 20000<app.timePassed<20050:
+        app.enemy=Enemy(3,"Kirisame Marisa",114514,300,50,10)
+    elif app.timePassed>20050:
+        if app.enemy is not None:
+            if app.timePassed%66==0:
+                bossBullet(app,4,4,5,114514)
+            if 23000<app.timePassed<30000:
+                if app.pattern2start is None:
+                    app.pattern2start=app.timePassed
+                    app.pattern2gencount=0
+                    app.xyList=[]
+                    for i in range(15):
+                        app.xyList.append((100+random.randint(-20,20),50*i))
+                pattern2(app,app.xyList,3,0,5,1,1000,100,50)
+                if app.timePassed%500==0:
+                    pattern1(app.enemy.x,app.enemy.y,3,5,3,1,1000,random.randint(-20,20),app)
+        else:
+            app.stage=3
+            app.timePassed=0
+            app.pattern2start=None
 
 def Start_redrawAll(app,canvas):
     canvas.create_text(300,300,font="Helvetica", text="Press any key to start")
@@ -212,14 +239,13 @@ def Game_timerFired(app):
     app.timePassed+=app.timerDelay
     if app.enemy is not None:
         enemyTick(app)
-    if app.pattern2gen:
-        pattern2(app,app.xyList,5,90,5,1,114,100,50)
     checkMovements(app)
     if app.character.isFiring:
         firePlayerBullet(True,app)
     bulletTick(app)
     playerBulletTick(app)
     clean(app,app.bulletList,app.playerBulletList) 
-    stage1(app)
+    stage2(app)
+    print(app.timePassed)
 runApp(height=600,width=800)
     
