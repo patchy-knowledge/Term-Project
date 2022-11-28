@@ -165,6 +165,7 @@ def stage1(app):
                         app.xyList.append((100+i*40+random.randint(-10,10),100+random.randint(-20,20)))
                 pattern2(app,app.xyList,5,90,5,1,114,100,50)
         else:
+            #reset stage
             app.stage=2
             app.timePassed=0
             app.pattern2start=None
@@ -187,15 +188,42 @@ def stage2(app):
                     app.pattern2gencount=0
                     app.xyList=[]
                     for i in range(15):
-                        app.xyList.append((100+random.randint(-20,20),50*i))
+                        app.xyList.append((100+random.randint(-20,20),40*i))
                 pattern2(app,app.xyList,3,0,5,1,1000,100,50)
                 if app.timePassed%500==0:
                     pattern1(app.enemy.x,app.enemy.y,3,5,3,1,1000,random.randint(-20,20),app)
         else:
+            #reset stage
             app.stage=3
             app.timePassed=0
             app.pattern2start=None
 
+def stage3(app):
+    #to do: draw tenshi's bullet image, tenshi resource
+    #to do: change drawEnemy
+    if app.timePassed<15000:
+        if app.timePassed%66==0:
+            randomBullet(app,2,5,1,1145)
+        elif 15000<=app.timePassed<=15050:
+            app.enemy=Enemy(1.5,"Hinanawi Tenshi",198893,300,50,10)
+        elif app.timePassed>15050:
+            if app.enemy is not None:
+                if app.timePassed%50==0:
+                    bossBullet(app,3,5,5,1145)
+                if 20000<app.timePassed<25000 or 30000<app.timePassed<35000:
+                    if app.pattern2start is None:
+                        app.pattern2start=app.timePassed
+                        app.pattern2gencount=0
+                        app.xyList=[]
+                        for i in range(15):
+                            app.xyList.append((30+35*i+random.randint(-10,10),100))
+                    pattern2(app,app.xyList,2,90,5,10,114,150,50)
+                    if app.timePassed%400==0:
+                        pattern1(app.enemy.x,app.enemy.y,2.5,5,2,10,100,random.randint(-10,10),app)
+        else:
+            #ends
+            app.mode="End"
+            
 def Start_redrawAll(app,canvas):
     canvas.create_text(300,300,font="Helvetica", text="Press any key to start")
 
