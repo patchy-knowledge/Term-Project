@@ -13,7 +13,6 @@ def appStarted(app):
     app.enemyList=[]
     app.powerupList=[]
     app.terrainList=[]
-    #tentative, test only!!!!
     app.character=Player(4,"Yuyuko",300,590,5,1,1)
     app.isFocus=False
     testCircularTerrain(300,300,50,app.terrainList)
@@ -29,10 +28,14 @@ def appStarted(app):
     app.score=0
     app.pattern2gen=False
     app.characterImage=app.loadImage('Yuyuko_char.png')
+    app.cachedCharacterImage=ImageTk.PhotoImage(app.characterImage)
     app.enemyImage=app.loadImage('Reimu_enemy.png')
+    app.cachedEnemyImage=ImageTk.PhotoImage(app.enemyImage)
     app.enemyBulletImage=app.loadImage('Reimu_shot.png')
+    app.cachedEnemyBulletImage=ImageTk.PhotoImage(app.enemyBulletImage)
     app.stageBackground=app.loadImage('Stage_Background_Alt.png')
     app.playerBulletImage=app.loadImage('Yuyuko_shot.png')
+    app.cachedPlayerBulletImage=ImageTk.PhotoImage(app.playerBulletImage)
     app.grazeCount=0
     app.pattern2start=None
     app.stage=2
@@ -134,18 +137,16 @@ def drawScore(app,canvas):
     canvas.create_text(650,50,font='Arial 20',text=f"Score\n {app.score}")
     canvas.create_text(650,150,font='Arial 20',text=f"Graze\n {app.grazeCount}")
 def drawCharacters(app,canvas):
-    canvas.create_image(app.character.x,app.character.y,image=ImageTk.PhotoImage(app.characterImage))
+    canvas.create_image(app.character.x,app.character.y,image=app.cachedCharacterImage)
     canvas.create_oval(app.character.x-app.character.radius,app.character.y-app.character.radius,
     app.character.x+app.character.radius,app.character.y+app.character.radius,fill="white")
     if app.enemy is not None:
-        canvas.create_image(app.enemy.x,app.enemy.y,image=ImageTk.PhotoImage(app.enemyImage))
-        canvas.create_oval(app.enemy.x-app.enemy.radius,app.enemy.y-app.enemy.radius,
-        app.enemy.x+app.enemy.radius,app.enemy.y+app.enemy.radius,fill="magenta")
+        canvas.create_image(app.enemy.x,app.enemy.y,image=app.cachedEnemyImage)
 def drawBullets(app,canvas):
     for bullet in app.bulletList:
-        canvas.create_image(bullet.x,bullet.y,image=ImageTk.PhotoImage(app.enemyBulletImage))
+        canvas.create_image(bullet.x,bullet.y,image=app.cachedEnemyBulletImage)
     for playerBullet in app.playerBulletList:
-        canvas.create_image(playerBullet.x,playerBullet.y,image=ImageTk.PhotoImage(app.playerBulletImage))
+        canvas.create_image(playerBullet.x,playerBullet.y,image=app.cachedPlayerBulletImage)
 
 def stage1(app):
     #to-do: load Reimu's bullet image
@@ -185,6 +186,8 @@ def stage2(app):
     if not app.initialized:
         app.enemyImage=app.loadImage('Marisa_enemy.png')
         app.enemyBulletImage=app.loadImage('Marisa_shot.png')
+        app.cachedEnemyImage=ImageTk.PhotoImage(app.enemyImage)
+        app.cachedEnemyBulletImage=ImageTk.PhotoImage(app.enemyBulletImage)
     if app.timePassed<20000:
         if app.timePassed%75==0:
             randomBullet(app,4,4,10,114514)
