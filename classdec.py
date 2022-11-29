@@ -17,18 +17,18 @@ class generic:
 
 class Player(generic):
     #type of shotPattern and spellPattern should be int
-    def __init__(self,speed,name,x,y,radius,shotPattern,spellPattern):
+    def __init__(self,speed,name,x,y,radius):
         #player's health is defaulted to 1 to ensure death upon impact
         super().__init__(speed,1,x,y,radius)
         self.name=name
-        self.shotPattern=shotPattern
-        self.spellPattern=spellPattern
-        self.timer=0
         self.canTrack=False
         self.power=1
         self.isFiring=False
         self.isInvincible=False
-
+        self.life=2
+        self.bomb=3
+        self.timer=None
+        
 class Enemy(generic):
     def __init__(self,speed,name,health,x,y,radius):
         super().__init__(speed,health,x,y,radius)
@@ -47,12 +47,7 @@ class bullet:
         self.freeze=False
         self.age=0
         self.grazed=False
-    
-    def freeze(self):
-        self.freeze=True
-    
-    def unFreeze(self):
-        self.freeze=False
+        self.timer=None
 
 class playerShot(bullet):
     def __init__(self,x,y,speed,direction,radius,damage,lifetime,tracking):

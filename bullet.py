@@ -27,6 +27,22 @@ def checkGraze(character,bullet):
         return True
     return False
 
+def bomb(app):
+    if app.character.bomb>0:
+        app.character.timer=2000
+        app.character.isInvincible=True
+        app.newBulletList=[]
+        for bullet in app.bulletList:
+            if distance(bullet.x,bullet.y,app.character.x,app.character.y)>250:
+                app.newBulletList.append(bullet)
+        app.bulletList=app.newBulletList
+
+def freeze(app,x,y,r):
+    for bullet in app.bulletList:
+        if distance(bullet.x,bullet.y,x,y)<r and not bullet.freeze:
+            bullet.freeze=True
+            bullet.timer=1000
+
 def clean(app,bulletList,playerBulletList):
     for bullet in bulletList:
         if bullet.x>600-bullet.radius or bullet.x<0 or bullet.y<0 or bullet.y>600-bullet.radius:

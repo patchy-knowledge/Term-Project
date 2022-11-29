@@ -5,6 +5,8 @@ from helper import *
 from terrain import *
 from time import *
 
+#art assets are from Touhou 8: Imperishable Night
+#retrieved from https://www.spriters-resource.com/download/34544/
 def appStarted(app):
     app.timerDelay=10
     app.timePassed=0
@@ -13,7 +15,7 @@ def appStarted(app):
     app.enemyList=[]
     app.powerupList=[]
     app.terrainList=[]
-    app.character=Player(4,"Yuyuko",300,590,5,1,1)
+    app.character=Player(6,"Yuyuko",300,590,5)
     app.isFocus=False
     testCircularTerrain(300,300,50,app.terrainList)
     app.mode="Start"
@@ -46,24 +48,33 @@ def checkMovements(app):
     cy=app.character.y
     if app.keyHoldDict["Up"] and checkTerrain(app.character,app.terrainList) not in (4,5,7) and not cy<0:
         if app.isFocus:
-            app.character.y-=0.2*app.character.speed
+            app.character.y-=0.3*app.character.speed
         else:
             app.character.y-=app.character.speed
     if app.keyHoldDict["Down"] and checkTerrain(app.character,app.terrainList) not in (3,6,8) and not cy>app.height:
         if app.isFocus:
-            app.character.y+=0.2*app.character.speed
+            app.character.y+=0.3*app.character.speed
         else:
             app.character.y+=app.character.speed
     if app.keyHoldDict["Left"] and checkTerrain(app.character,app.terrainList) not in (2,5,6) and not cx<0:
         if app.isFocus:
-            app.character.x-=0.2*app.character.speed
+            app.character.x-=0.3*app.character.speed
         else:
             app.character.x-=app.character.speed
     if app.keyHoldDict["Right"] and checkTerrain(app.character,app.terrainList) not in (1,7,8) and not cx>0.75*app.width:
         if app.isFocus:
-            app.character.x+=0.2*app.character.speed
+            app.character.x+=0.3*app.character.speed
         else:
             app.character.x+=app.character.speed
+
+def characterTick(app):
+    if app.character.timer is not None:
+        if app.character.timer<=0:
+            if app.character.isInvincible:
+                app.character.isInvincible=False
+            app.character.timer=None
+        else:
+            app.character.timer-=app.timerDelay
 
 def bulletTick(app):
     for Bullet in app.bulletList:
@@ -73,10 +84,19 @@ def bulletTick(app):
             Bullet.y+=dy
         if not app.character.isInvincible:
             if checkCollision(app.character,Bullet,app.bulletList):
-                print("Collision Detected")
+                app.character.life-=1
+                if app.character.life==0:
+                    app.mode="end"
         if checkGraze(app.character,Bullet) and not Bullet.grazed:
             Bullet.grazed=True
             app.grazeCount+=1
+        if Bullet.timer is not None:
+            if Bullet.timer<=0:
+                if Bullet.freeze:
+                    Bullet.freeze=False
+                Bullet.timer=None
+            else:
+                Bullet.timer-=app.timerDelay
 
 def enemyTick(app):
     if app.enemy.health<=0:
@@ -136,12 +156,16 @@ def drawPowerups(app,canvas):
 def drawScore(app,canvas):
     canvas.create_text(650,50,font='Arial 20',text=f"Score\n {app.score}")
     canvas.create_text(650,150,font='Arial 20',text=f"Graze\n {app.grazeCount}")
+    canvas.create_text(650,250,font='Arial 20',text=f"Life\n {app.character.life}")
+    canvas.create_text(650,350,font='Arial 20',text=f"Bomb\n {app.character.bomb}")
+
 def drawCharacters(app,canvas):
     canvas.create_image(app.character.x,app.character.y,image=app.cachedCharacterImage)
     canvas.create_oval(app.character.x-app.character.radius,app.character.y-app.character.radius,
     app.character.x+app.character.radius,app.character.y+app.character.radius,fill="white")
     if app.enemy is not None:
         canvas.create_image(app.enemy.x,app.enemy.y,image=app.cachedEnemyImage)
+
 def drawBullets(app,canvas):
     for bullet in app.bulletList:
         canvas.create_image(bullet.x,bullet.y,image=app.cachedEnemyBulletImage)
@@ -263,6 +287,10 @@ def Game_keyPressed(app,event):
         app.character.isFiring=not app.character.isFiring
     if event.key=="z":
         app.isFocus=not app.isFocus
+    if event.key=="f":
+        freeze(app,app.character.x,app.character.y-80,80)
+    if event.key=="x":
+        bomb(app)
     if event.key in ("Up","Down","Left","Right"):
         app.keyHoldDict[event.key]=True
         
@@ -277,6 +305,7 @@ def Game_timerFired(app):
     checkMovements(app)
     if app.character.isFiring:
         firePlayerBullet(True,app)
+    characterTick(app)
     bulletTick(app)
     playerBulletTick(app)
     clean(app,app.bulletList,app.playerBulletList) 
