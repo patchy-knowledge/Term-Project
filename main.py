@@ -30,10 +30,13 @@ def appStarted(app):
     app.pattern2gen=False
     app.characterImage=app.loadImage('Yuyuko_char.png')
     app.enemyImage=app.loadImage('Reimu_enemy.png')
+    app.enemyBulletImage=app.loadImage('Reimu_shot.png')
     app.stageBackground=app.loadImage('Stage_Background_Alt.png')
+    app.playerBulletImage=app.loadImage('Yuyuko_shot.png')
     app.grazeCount=0
     app.pattern2start=None
     app.stage=2
+    app.initialized=False
 
 def checkMovements(app):
     cx=app.character.x
@@ -138,6 +141,11 @@ def drawCharacters(app,canvas):
         canvas.create_image(app.enemy.x,app.enemy.y,image=ImageTk.PhotoImage(app.enemyImage))
         canvas.create_oval(app.enemy.x-app.enemy.radius,app.enemy.y-app.enemy.radius,
         app.enemy.x+app.enemy.radius,app.enemy.y+app.enemy.radius,fill="magenta")
+def drawBullets(app,canvas):
+    for bullet in app.bulletList:
+        canvas.create_image(bullet.x,bullet.y,image=ImageTk.PhotoImage(app.enemyBulletImage))
+    for playerBullet in app.playerBulletList:
+        canvas.create_image(playerBullet.x,playerBullet.y,image=ImageTk.PhotoImage(app.playerBulletImage))
 
 def stage1(app):
     #to-do: load Reimu's bullet image
@@ -169,13 +177,17 @@ def stage1(app):
             app.stage=2
             app.timePassed=0
             app.pattern2start=None
+            app.initialized=False
 
 def stage2(app):
     #to do: load Marisa's bullet image
     #to do: modify drawEnemy
+    if not app.initialized:
+        app.enemyImage=app.loadImage('Marisa_enemy.png')
+        app.enemyBulletImage=app.loadImage('Marisa_shot.png')
     if app.timePassed<20000:
         if app.timePassed%75==0:
-            randomBullet(app,4,3,10,114514)
+            randomBullet(app,4,4,10,114514)
     elif 20000<app.timePassed<20050:
         app.enemy=Enemy(3,"Kirisame Marisa",114514,300,50,10)
     elif app.timePassed>20050:
@@ -189,18 +201,22 @@ def stage2(app):
                     app.xyList=[]
                     for i in range(15):
                         app.xyList.append((100+random.randint(-20,20),40*i))
-                pattern2(app,app.xyList,3,0,5,1,1000,100,50)
+                pattern2(app,app.xyList,3,0,4,1,1000,100,50)
                 if app.timePassed%500==0:
-                    pattern1(app.enemy.x,app.enemy.y,3,5,3,1,1000,random.randint(-20,20),app)
+                    pattern1(app.enemy.x,app.enemy.y,3,4,3,1,1000,random.randint(-20,20),app)
         else:
             #reset stage
             app.stage=3
             app.timePassed=0
             app.pattern2start=None
+            app.initialized=False
 
 def stage3(app):
     #to do: draw tenshi's bullet image, tenshi resource
     #to do: change drawEnemy
+    if not app.initialized:
+        app.enemyImage=app.loadImage('Tenshi_enemy.png')
+        app.enemyBulletImage=app.loadImage('Tenshi_shot.png')
     if app.timePassed<15000:
         if app.timePassed%66==0:
             randomBullet(app,2,5,1,1145)

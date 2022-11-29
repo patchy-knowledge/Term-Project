@@ -37,12 +37,13 @@ def clean(app,bulletList,playerBulletList):
 
 #test only
 def firePlayerBullet(track,app):
-    for i in range(math.floor(app.character.power)):
-        if i==0:
-            app.playerBulletList.append(playerShot(app.character.x,app.character.y,10,-90,3,50,114514,track))
-        else:
-            app.playerBulletList.append(playerShot(app.character.x+i*10,app.character.y,10,-90,3,50,114514,track))
-            app.playerBulletList.append(playerShot(app.character.x-i*10,app.character.y,10,-90,3,50,114514,track))
+    if app.timePassed%30==0:
+        for i in range(math.floor(app.character.power)):
+            if i==0:
+                app.playerBulletList.append(playerShot(app.character.x,app.character.y,10,-90,8,50,114514,track))
+            else:
+                app.playerBulletList.append(playerShot(app.character.x+i*10,app.character.y,10,-90,8,50,114514,track))
+                app.playerBulletList.append(playerShot(app.character.x-i*10,app.character.y,10,-90,8,50,114514,track))
 
 def pattern1(x,y,density,size,speed,damage,lifetime,offset,app):
     count=180//density
@@ -87,10 +88,4 @@ def bossBullet(app,speed,size,damage,lifetime):
     if direction<0:
         direction+=180
     app.bulletList.append(bullet(app.enemy.x,app.enemy.y,speed,direction,size,damage,lifetime))
-def drawBullets(app,canvas):
-    for bullet in app.bulletList:
-        canvas.create_oval(bullet.x-bullet.radius,bullet.y-bullet.radius,
-        bullet.x+bullet.radius,bullet.y+bullet.radius,fill="yellow")
-    for playerBullet in app.playerBulletList:
-        canvas.create_oval(playerBullet.x-playerBullet.radius,playerBullet.y-playerBullet.radius,
-        playerBullet.x+playerBullet.radius,playerBullet.y+playerBullet.radius,fill="red")
+

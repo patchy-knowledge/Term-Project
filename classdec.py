@@ -30,11 +30,9 @@ class Player(generic):
         self.isInvincible=False
 
 class Enemy(generic):
-    #enemies do not have spells
-    def __init__(self,speed,name,health,x,y,radius,shotPattern):
+    def __init__(self,speed,name,health,x,y,radius):
         super().__init__(speed,health,x,y,radius)
         self.name=name
-        self.shotPattern=shotPattern
         self.direction=0
 
 class bullet:
