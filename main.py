@@ -262,18 +262,6 @@ def Game_keyPressed(app,event):
         app.isFocus=not app.isFocus
     if event.key in ("Up","Down","Left","Right"):
         app.keyHoldDict[event.key]=True
-    if event.key=="1":
-        pattern1(300,50,10,8,2,1,100,0,app)
-        pattern1(100,50,10,8,2,1,100,5,app)
-        pattern1(500,50,10,8,2,1,100,5,app)
-    if event.key=="2":
-        app.xyList=[(100,100),(200,100),(300,100),(400,100),(500,100)]
-        app.pattern2gen=True
-        app.pattern2start=app.timePassed
-        app.pattern2count=5
-        app.pattern2gencount=0
-    if event.key=="3":
-        randomBullet(app,5,10,5,114)
         
 def Game_keyReleased(app,event):
     if event.key in ("Up","Down","Left","Right"):
