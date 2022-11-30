@@ -7,10 +7,9 @@ import random
 def testBullet(x,y,speed,direction,radius,damage,lifetime,app):
     app.bulletList.append(bullet(x,y,speed,direction,radius,damage,lifetime))
 
-def checkCollision(character,bullet,bulletList):
+def checkCollision(character,bullet,app):
     if distance(character.x,character.y,bullet.x,bullet.y)<=character.radius+bullet.radius:
-        bulletList.remove(bullet)
-        character.health-=bullet.damage
+        app.bulletList.remove(bullet)
         return True
     return False
 

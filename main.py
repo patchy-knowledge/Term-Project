@@ -3,10 +3,13 @@ from classdec import *
 from bullet import *
 from helper import *
 from terrain import *
+from powerup import *
 from time import *
 
 #art assets are from Touhou 8: Imperishable Night
 #retrieved from https://www.spriters-resource.com/download/34544/
+#and https://en.touhouwiki.net/wiki/Category:Imperishable_Night_Images
+
 def appStarted(app):
     app.timerDelay=10
     app.timePassed=0
@@ -17,7 +20,6 @@ def appStarted(app):
     app.terrainList=[]
     app.character=Player(6,"Yuyuko",300,590,5)
     app.isFocus=False
-    testCircularTerrain(300,300,50,app.terrainList)
     app.mode="Start"
     app.cleared=True
     app.scroll=0
@@ -29,6 +31,13 @@ def appStarted(app):
     app.keyHoldDict["Right"]=False
     app.score=0
     app.pattern2gen=False
+    app.grazeCount=0
+    app.pattern2start=None
+    app.stage=1
+    app.initialized=False
+    loadImage(app)
+
+def loadImage(app):
     app.characterImage=app.loadImage('Yuyuko_char.png')
     app.cachedCharacterImage=ImageTk.PhotoImage(app.characterImage)
     app.enemyImage=app.loadImage('Reimu_enemy.png')
@@ -38,10 +47,18 @@ def appStarted(app):
     app.stageBackground=app.loadImage('Stage_Background_Alt.png')
     app.playerBulletImage=app.loadImage('Yuyuko_shot.png')
     app.cachedPlayerBulletImage=ImageTk.PhotoImage(app.playerBulletImage)
-    app.grazeCount=0
-    app.pattern2start=None
-    app.stage=2
-    app.initialized=False
+    app.PowerIcon=app.loadImage('Power.png')
+    app.ExtendIcon=app.loadImage('Extend.png')
+    app.InvincibleIcon=app.loadImage('Invincible.png')
+    app.TrackIcon=app.loadImage('Track.png')
+    app.BombIcon=app.loadImage('Bomb.png')
+    app.cachedPower=ImageTk.PhotoImage(app.PowerIcon)
+    app.cachedExtend=ImageTk.PhotoImage(app.ExtendIcon)
+    app.cachedInvincible=ImageTk.PhotoImage(app.InvincibleIcon)
+    app.cachedTrack=ImageTk.PhotoImage(app.TrackIcon)
+    app.cachedBomb=ImageTk.PhotoImage(app.BombIcon)
+    app.terrainImage=app.loadImage("Rock_img.png")
+    app.cachedTerrain=ImageTk.PhotoImage(app.terrainImage)
 
 def checkMovements(app):
     cx=app.character.x
@@ -67,6 +84,14 @@ def checkMovements(app):
         else:
             app.character.x+=app.character.speed
 
+def terrainTick(app):
+    if app.timePassed%1000==0:
+        for terrain in app.terrainList:
+            terrain.y+=50
+    cleanTerrain(app)
+    if len(app.terrainList)==0:
+        app.terrainList.append(circularTerrain(random.randint(100,500),random.randint(150,300),100))
+
 def characterTick(app):
     if app.character.timer is not None:
         if app.character.timer<=0:
@@ -83,8 +108,10 @@ def bulletTick(app):
             Bullet.x+=dx
             Bullet.y+=dy
         if not app.character.isInvincible:
-            if checkCollision(app.character,Bullet,app.bulletList):
+            if checkCollision(app.character,Bullet,app):
                 app.character.life-=1
+                app.character.invincible=True
+                app.character.timer=2000
                 if app.character.life==0:
                     app.mode="end"
         if checkGraze(app.character,Bullet) and not Bullet.grazed:
@@ -143,21 +170,53 @@ def playerBulletTick(app):
         dx,dy=polar2cart(playerBullet.direction,playerBullet.speed)
         playerBullet.x+=dx
         playerBullet.y+=dy
+
+def powerupTick(app):
+    cleanPowerup(app)
+    if len(app.powerupList)<=3:
+        if app.timePassed%2500==0:
+            if randgen(25):
+                app.powerupList.append(powerup(random.randint(50,550),0,random.randint(2,4),"Power"))
+        if app.timePassed%5000==0:
+            if randgen(30):
+                app.powerupList.append(powerup(random.randint(50,550),0,random.randint(2,4),"Extend"))
+            if randgen(25):
+                app.powerupList.append(powerup(random.randint(50,550),0,random.randint(2,4),"Track"))
+        if app.timePassed%3000==0:
+            if randgen(30):
+                app.powerupList.append(powerup(random.randint(50,550),0,random.randint(2,4),"Bomb"))
+        if app.timePassed%6000==0:
+            if randgen(30):
+                app.powerupList.append(powerup(random.randint(50,550),0,random.randint(2,4),"Invincible"))
+    for Powerup in app.powerupList:
+        Powerup.y+=Powerup.speed
+        checkPowerupPickup(Powerup,app)
         
 def drawPowerups(app,canvas):
-    for powerup in app.powerUpList:
-        if powerup.type=="invincible":
-            canvas.create_oval(powerup.x-10,powerup.y-10,powerup.x+10,powerup.y+10,fill="blue")
-        elif powerup.type=="power":
-            canvas.create_oval(powerup.x-10,powerup.y-10,powerup.x+10,powerup.y+10,fill="red")
-        elif powerup.type=="track":
-            canvas.create_oval(powerup.x-10,powerup.y-10,powerup.x+10,powerup.y+10,fill="purple")
+    for powerup in app.powerupList:
+        if powerup.type=="Invincible":
+            canvas.create_image(powerup.x,powerup.y,image=app.cachedInvincible)
+        elif powerup.type=="Bomb":
+            canvas.create_image(powerup.x,powerup.y,image=app.cachedBomb)
+        elif powerup.type=="Track":
+            canvas.create_image(powerup.x,powerup.y,image=app.cachedTrack)
+        elif powerup.type=="Extend":
+            canvas.create_image(powerup.x,powerup.y,image=app.cachedExtend)
+        elif powerup.type=="Power":
+            canvas.create_image(powerup.x,powerup.y,image=app.cachedPower)
 
 def drawScore(app,canvas):
     canvas.create_text(650,50,font='Arial 20',text=f"Score\n {app.score}")
     canvas.create_text(650,150,font='Arial 20',text=f"Graze\n {app.grazeCount}")
     canvas.create_text(650,250,font='Arial 20',text=f"Life\n {app.character.life}")
     canvas.create_text(650,350,font='Arial 20',text=f"Bomb\n {app.character.bomb}")
+
+def drawTerrain(app,canvas):
+    for terrain in app.terrainList:
+        if isinstance(terrain,rectTerrain):
+            pass
+        elif isinstance(terrain,circularTerrain):
+            canvas.create_image(terrain.x,terrain.y,image=app.cachedTerrain)
 
 def drawCharacters(app,canvas):
     canvas.create_image(app.character.x,app.character.y,image=app.cachedCharacterImage)
@@ -173,7 +232,6 @@ def drawBullets(app,canvas):
         canvas.create_image(playerBullet.x,playerBullet.y,image=app.cachedPlayerBulletImage)
 
 def stage1(app):
-    #to-do: load Reimu's bullet image
     if app.timePassed<15000:
         if app.timePassed%100==0:
             randomBullet(app,2,5,1,114)
@@ -205,8 +263,6 @@ def stage1(app):
             app.initialized=False
 
 def stage2(app):
-    #to do: load Marisa's bullet image
-    #to do: modify drawEnemy
     if not app.initialized:
         app.enemyImage=app.loadImage('Marisa_enemy.png')
         app.enemyBulletImage=app.loadImage('Marisa_shot.png')
@@ -239,11 +295,11 @@ def stage2(app):
             app.initialized=False
 
 def stage3(app):
-    #to do: draw tenshi's bullet image, tenshi resource
-    #to do: change drawEnemy
     if not app.initialized:
         app.enemyImage=app.loadImage('Tenshi_enemy.png')
         app.enemyBulletImage=app.loadImage('Tenshi_shot.png')
+        app.cachedEnemyImage=ImageTk.PhotoImage(app.enemyImage)
+        app.cachedEnemyBulletImage=ImageTk.PhotoImage(app.enemyBulletImage)
     if app.timePassed<15000:
         if app.timePassed%66==0:
             randomBullet(app,2,5,1,1145)
@@ -275,12 +331,13 @@ def Start_keyPressed(app,event):
 
 def Game_redrawAll(app,canvas):
     canvas.create_image(300,300,image=ImageTk.PhotoImage(app.stageBackground))
+    drawTerrain(app,canvas)
     drawCharacters(app,canvas)
     if app.enemy is not None:
         canvas.create_text(300,50,font="Arial 26", text=app.enemy.health)
-    drawTerrain(app,canvas)
     drawBullets(app,canvas)
     drawScore(app,canvas)
+    drawPowerups(app,canvas)
 
 def Game_keyPressed(app,event):
     if event.key=="Space":
@@ -304,12 +361,19 @@ def Game_timerFired(app):
         enemyTick(app)
     checkMovements(app)
     if app.character.isFiring:
-        firePlayerBullet(True,app)
+        firePlayerBullet(app.character.canTrack,app)
     characterTick(app)
+    powerupTick(app)
     bulletTick(app)
     playerBulletTick(app)
+    terrainTick(app)
     clean(app,app.bulletList,app.playerBulletList) 
-    stage2(app)
+    if app.stage==1:
+        stage1(app)
+    elif app.stage==2:
+        stage2(app)
+    elif app.stage==3:
+        stage3(app)
     print(app.timePassed)
 runApp(height=600,width=800)
     

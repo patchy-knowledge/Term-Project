@@ -1,5 +1,5 @@
 import math
-
+import random
 #does the job but not quite well
 def cart2polar(x,y):
     if x==0:
@@ -22,3 +22,9 @@ def distance(x1,y1,x2,y2):
 def delta(a,b):
     return abs(a-b)
 
+#p denotes probability in percentage
+def randgen(p):
+    i=random.randint(0,100)
+    if i<p:
+        return True
+    return False

@@ -43,12 +43,8 @@ def checkTerrain(character,terrainList):
                 return 1
     return 0
 
-def drawTerrain(app,canvas):
+def cleanTerrain(app):
     for terrain in app.terrainList:
-        if isinstance(terrain,rectTerrain):
-            canvas.create_rectangle(terrain.x1,terrain.y1,terrain.x2,terrain.y2,
-            fill="white",outline="black")
-        elif isinstance(terrain,circularTerrain):
-            canvas.create_oval(terrain.x-terrain.r,terrain.y-terrain.r,
-            terrain.x+terrain.r,terrain.y+terrain.r,fill="white",outline="black")
+        if terrain.y-terrain.r>600:
+            app.terrainList.remove(terrain)
 

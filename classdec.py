@@ -75,5 +75,5 @@ class powerup:
         self.x=x
         self.y=y
         self.speed=speed
-        self.r=15
+        self.r=8
         self.type=powertype
