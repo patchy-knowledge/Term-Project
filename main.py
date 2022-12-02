@@ -110,7 +110,7 @@ def bulletTick(app):
         if not app.character.isInvincible:
             if checkCollision(app.character,Bullet,app):
                 app.character.life-=1
-                app.character.invincible=True
+                app.character.isInvincible=True
                 app.character.timer=2000
                 if app.character.life==0:
                     app.mode="End"
@@ -208,8 +208,9 @@ def drawPowerups(app,canvas):
 def drawScore(app,canvas):
     canvas.create_text(650,50,font='Arial 20',text=f"Score\n {app.score}")
     canvas.create_text(650,150,font='Arial 20',text=f"Graze\n {app.grazeCount}")
-    canvas.create_text(650,250,font='Arial 20',text=f"Life\n {app.character.life}")
+    canvas.create_text(650,250,font='Arial 20',text=f"Life\n {app.character.life} {app.character.isInvincible}")
     canvas.create_text(650,350,font='Arial 20',text=f"Bomb\n {app.character.bomb}")
+    canvas.create_text(650,450,font='Arial 20',text=f"Timers: {app.timePassed} {app.character.timer}")
 
 def drawTerrain(app,canvas):
     for terrain in app.terrainList:
