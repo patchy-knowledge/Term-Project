@@ -113,7 +113,7 @@ def bulletTick(app):
                 app.character.invincible=True
                 app.character.timer=2000
                 if app.character.life==0:
-                    app.mode="end"
+                    app.mode="End"
         if checkGraze(app.character,Bullet) and not Bullet.grazed:
             Bullet.grazed=True
             app.grazeCount+=1
@@ -329,6 +329,11 @@ def Start_redrawAll(app,canvas):
 def Start_keyPressed(app,event):
     app.mode="Game"
 
+def End_redrawAll(app,canvas):
+    canvas.create_text(300,300,font="Helvetica",text="Game over!")
+    canvas.create_text(300,375,font="Helvetica",text=f"Damage score: {app.score}, Graze: {app.grazeCount}")
+    canvas.create_text(300,450,font="Helvetica",text=f"Total score: {app.score+25*app.grazeCount}")
+
 def Game_redrawAll(app,canvas):
     canvas.create_image(300,300,image=ImageTk.PhotoImage(app.stageBackground))
     drawTerrain(app,canvas)
@@ -376,4 +381,3 @@ def Game_timerFired(app):
         stage3(app)
     print(app.timePassed)
 runApp(height=600,width=800)
-    

@@ -28,6 +28,7 @@ class Player(generic):
         self.life=2
         self.bomb=3
         self.timer=None
+        self.experience=0
         
 class Enemy(generic):
     def __init__(self,speed,name,health,x,y,radius):

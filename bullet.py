@@ -28,13 +28,17 @@ def checkGraze(character,bullet):
 
 def bomb(app):
     if app.character.bomb>0:
+        app.character.bomb-=1
         app.character.timer=2000
         app.character.isInvincible=True
         app.newBulletList=[]
+        playerPattern1(app.character.x,app.character.y,3,5,3,150,114,-1.5,app)
+        playerPattern1(app.character.x,app.character.y,3,5,5,150,114,0,app)
         for bullet in app.bulletList:
             if distance(bullet.x,bullet.y,app.character.x,app.character.y)>250:
                 app.newBulletList.append(bullet)
         app.bulletList=app.newBulletList
+
 
 def freeze(app,x,y,r):
     for bullet in app.bulletList:
@@ -47,7 +51,7 @@ def clean(app,bulletList,playerBulletList):
         if bullet.x>600-bullet.radius or bullet.x<0 or bullet.y<0 or bullet.y>600-bullet.radius:
             bulletList.remove(bullet)
     for playerBullet in playerBulletList:
-        if playerBullet.x>app.width or playerBullet.x<0 or playerBullet.y<0 or playerBullet.y>app.height:
+        if playerBullet.x>600 or playerBullet.x<0 or playerBullet.y<0 or playerBullet.y>600:
             playerBulletList.remove(playerBullet)
 
 #test only
@@ -55,15 +59,20 @@ def firePlayerBullet(track,app):
     if app.timePassed%30==0:
         for i in range(math.floor(app.character.power)):
             if i==0:
-                app.playerBulletList.append(playerShot(app.character.x,app.character.y,10,-90,8,50,114514,track))
+                app.playerBulletList.append(playerShot(app.character.x,app.character.y,10,-90,8,100*app.character.power,114514,track))
             else:
-                app.playerBulletList.append(playerShot(app.character.x+i*10,app.character.y,10,-90,8,50,114514,track))
-                app.playerBulletList.append(playerShot(app.character.x-i*10,app.character.y,10,-90,8,50,114514,track))
+                app.playerBulletList.append(playerShot(app.character.x+i*10,app.character.y,10,-90,8,100*app.character.power,114514,track))
+                app.playerBulletList.append(playerShot(app.character.x-i*10,app.character.y,10,-90,8,100*app.character.power,114514,track))
 
 def pattern1(x,y,density,size,speed,damage,lifetime,offset,app):
     count=180//density
     for i in range(1,count):
         app.bulletList.append(bullet(x,y,speed,i*density+offset,size,damage,lifetime))
+
+def playerPattern1(x,y,density,size,speed,damage,lifetime,offset,app):
+    count=180//density
+    for i in range(1,count):
+        app.playerBulletList.append(playerShot(x,y,speed,180+i*density+offset,size,damage,lifetime,False))
 
 def pattern2(app,xyList,speed,direction,size,damage,lifetime,count,timeLapse):
     app.pattern2count=count
