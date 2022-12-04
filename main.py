@@ -37,6 +37,7 @@ def appStarted(app):
     app.initialized=False
     loadImage(app)
     marketInit(app)
+    app.character.experience=114514
 
 def loadImage(app):
     app.characterImage=app.loadImage('Yuyuko_char.png')
@@ -64,6 +65,11 @@ def loadImage(app):
 def marketInit(app):
     app.marketExtend=2
     app.marketBomb=5
+    app.trackCost=100
+    app.bombCost=100
+    app.extendCost=100
+    app.powerCost=10
+    app.marketMessage=""
 
 def checkMovements(app):
     cx=app.character.x
@@ -355,17 +361,55 @@ def Game_redrawAll(app,canvas):
     drawPowerups(app,canvas)
 
 def Market_keyPressed(app,event):
-    app.mode="Game"
+    if event.key=="1":
+        if app.character.canTrack:
+            app.marketMessage="Tracking ability already obtained"
+        elif app.character.experience//app.trackCost==0:
+            app.marketMessage="Not enough experience!"
+        else:
+            app.marketMessage=f"Successfully purchased tracking ability, used {app.trackCost} experience"
+            app.character.canTrack=True
+            app.character.experience-=app.trackCost
+    elif event.key=="2":
+        if app.marketBomb<=0:
+            app.marketMessage="Sold out!"
+        elif app.character.experience//app.bombCost==0:
+            app.marketMessage="Not enough experience!"
+        else:
+            app.marketMessage=f"Successfully purchased bomb, used {app.bombCost} experience"
+            app.character.bomb+=1
+            app.marketBomb-=1
+            app.character.experience-=app.bombCost
+    elif event.key=="3":
+        if app.marketExtend<=0:
+            app.marketMessage="Sold out!"
+        elif app.character.experience//app.extendCost==0:
+            app.marketMessage="Not enough experience!"
+        else:
+            app.marketMessage=f"Successfully purchased extra life, used {app.extendCost} experience"
+            app.character.life+=1
+            app.marketExtend-=1
+            app.character.experience-=app.extendCost
+    elif event.key=="4":
+        if app.character.experience//app.powerCost==0:
+            app.marketMessage="Not enough experience!"
+        else:
+            app.marketMessage=f"Successfully purchased 0.05 power, used {app.powerCost} experience"
+            app.character.power+=0.05
+            app.character.experience-=app.powerCost
+    elif event.key=="m":
+        app.mode="Game"
+
 
 def Market_redrawAll(app,canvas):
     canvas.create_text(50,50,font="Helvetica",anchor="nw",text=f"Spendable experience: {app.character.experience}")
     trackcount=0
     if not app.character.canTrack: trackcount=1
-    canvas.create_text(50,80,font="Helvetica",anchor="nw",text=f"1. Tracking ability: remaining {trackcount}, cost 114514")
-    canvas.create_text(50,110,font="Helvetica",anchor="nw",text=f"2. Extra bomb: remaining {app.marketBomb}, cost 1919")
-    canvas.create_text(50,140,font="Helvetica",anchor="nw",text=f"3. Extra life: remaining {app.marketExtend}, cost 810")
-    canvas.create_text(50,170,font="Helvetica",anchor="nw",text=f"4. Power up 0.05, current power {app.character.power}, cost 114")
-    
+    canvas.create_text(50,80,font="Helvetica",anchor="nw",text=f"1. Tracking ability: remaining {trackcount}, cost {app.trackCost}, available {min(trackcount,app.character.experience//app.trackCost)}")
+    canvas.create_text(50,110,font="Helvetica",anchor="nw",text=f"2. Extra bomb: remaining {app.marketBomb}, cost {app.bombCost}, available {min(app.marketBomb,app.character.experience//app.bombCost)}")
+    canvas.create_text(50,140,font="Helvetica",anchor="nw",text=f"3. Extra life: remaining {app.marketExtend}, cost {app.extendCost}, available {min(app.marketExtend,app.character.experience//app.extendCost)}")
+    canvas.create_text(50,170,font="Helvetica",anchor="nw",text=f"4. Power up 0.05, current power {app.character.power}, cost {app.powerCost}, available {app.character.experience//app.powerCost}")
+    canvas.create_text(50,500,font="Helvetica",anchor="nw",text=app.marketMessage)
 def Game_keyPressed(app,event):
     if event.key=="Space":
         app.character.isFiring=not app.character.isFiring
