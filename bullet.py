@@ -20,7 +20,7 @@ def checkEnemyCollision(enemy,pbullet,playerBulletList,app):
         app.score+=10
         return True
     return False
-
+               
 def checkGraze(character,bullet):
     if character.radius+bullet.radius<distance(character.x,character.y,bullet.x,bullet.y)<=character.radius+bullet.radius+25:
         return True
@@ -102,7 +102,7 @@ def randomBullet(app,speed,size,damage,lifetime):
         direction+=180
     app.bulletList.append(bullet(x,y,speed,direction,size,damage,lifetime))
 
-def bossBullet(app,speed,size,damage,lifetime):
+def bossBullet(app,speed,size,damage):
     dx=app.character.x-app.enemy.x
     dy=app.character.y-app.enemy.y
     if dx==0:
@@ -111,5 +111,9 @@ def bossBullet(app,speed,size,damage,lifetime):
         direction=180/math.pi*math.atan(dy/dx)
     if direction<0:
         direction+=180
-    app.bulletList.append(bullet(app.enemy.x,app.enemy.y,speed,direction,size,damage,lifetime))
+    r=random.randint(0,100)
+    if r<3:
+        app.bulletList.append(bullet(app.enemy.x,app.enemy.y,speed,direction,size,damage,150))
+    else:
+        app.bulletList.append(bullet(app.enemy.x,app.enemy.y,speed,direction,size,damage,114514))
 
