@@ -29,12 +29,18 @@ class Player(generic):
         self.bomb=3
         self.timer=None
         self.experience=0
-        
+    def getAttr(self):
+        res=(self.speed,self.name,self.x,self.y,self.radius,self.canTrack,self.power,self.isInvincible,self.life,self.bomb,self.timer,self.experience)
+        return res
+
 class Enemy(generic):
     def __init__(self,speed,name,health,x,y,radius):
         super().__init__(speed,health,x,y,radius)
         self.name=name
         self.direction=0
+    def getAttr(self):
+        res=(self.speed,self.name,self.x,self.y,self.radius,self.direction,self.health)
+        return res
 
 class bullet:
     def __init__(self,x,y,speed,direction,radius,damage,lifetime):
@@ -49,11 +55,17 @@ class bullet:
         self.age=0
         self.grazed=False
         self.timer=None
+    def getAttr(self):
+        res=(self.x,self.y,self.speed,self.direction,self.radius,self.damage,self.lifetime,self.freeze,self.grazed,self.timer)
+        return res
 
 class playerShot(bullet):
     def __init__(self,x,y,speed,direction,radius,damage,lifetime,tracking):
         super().__init__(x,y,speed,direction,radius,damage,lifetime)
         self.tracking=tracking
+    def getAttr(self):
+        res=(self.x,self.y,self.speed,self.direction,self.radius,self.damage,self.lifetime,self.tracking)
+        return res
 
 class enemyShot(bullet):
     pass
@@ -70,6 +82,9 @@ class circularTerrain:
         self.x=x
         self.y=y
         self.r=r
+    def getAttr(self):
+        res=(self.x,self.y,self.r)
+        return res
 
 class powerup:
     def __init__(self,x,y,speed,powertype):
@@ -78,3 +93,5 @@ class powerup:
         self.speed=speed
         self.r=8
         self.type=powertype
+    def getAttr(self):
+        res=(self.x,self.y,self.speed,self.type)

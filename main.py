@@ -5,7 +5,8 @@ from helper import *
 from terrain import *
 from powerup import *
 from time import *
-
+import pygame
+import shelve
 #art assets are from Touhou 8: Imperishable Night
 #retrieved from https://www.spriters-resource.com/download/34544/
 #and https://en.touhouwiki.net/wiki/Category:Imperishable_Night_Images
@@ -38,6 +39,7 @@ def appStarted(app):
     loadImage(app)
     marketInit(app)
     app.character.experience=114514
+    pygame.init()
 
 def loadImage(app):
     app.characterImage=app.loadImage('Yuyuko_char.png')
@@ -71,6 +73,85 @@ def marketInit(app):
     app.powerCost=10
     app.marketMessage=""
 
+def saveFile(app):
+    savedGame=shelve.open("save")
+    savedGame["timePassed"]=app.timePassed
+    savedGame["score"]=app.score
+    savedGame["graze"]=app.grazeCount
+    savedGame["stage"]=app.stage
+    savedGame["marketExtend"]=app.marketExtend
+    savedGame["marketBomb"]=app.marketBomb
+    savedGame["charAttr"]=app.character.getAttr()
+    playerBulletAttr=[]
+    for pBullet in app.playerBulletList:
+        playerBulletAttr.append(pBullet.getAttr())
+    bulletAttr=[]
+    for bullet in app.bulletList:
+        bulletAttr.append(bullet.getAttr())
+    savedGame["playerBulletAttr"]=playerBulletAttr
+    savedGame["bulletAttr"]=bulletAttr
+    if app.enemy is not None:
+        savedGame["enemyAttr"]=app.enemy.getAttr()
+    else:
+        savedGame["enemyAttr"]=None
+    terrainAttr=[]
+    for terrain in app.terrainList:
+        terrainAttr.append(terrain.getAttr())
+    savedGame["terrainAttr"]=terrainAttr
+    powerupAttr=[]
+    for powerup in app.powerupList:
+        powerupAttr.append(powerup.getAttr())
+    savedGame["powerupAttr"]=powerupAttr
+    savedGame.close()
+
+def readSaveFile(app):
+    savedGame=shelve.open("save")
+    app.timePassed=savedGame["timePassed"]
+    app.score=savedGame["score"]
+    app.grazeCount=savedGame["graze"]
+    app.stage=savedGame["stage"]
+    app.marketExtend=savedGame["marketExtend"]
+    app.marketBomb=savedGame["marketBomb"]
+    cspeed,cname,cx,cy,cr,cTrack,cPower,cInvincible,cLife,cBomb,cTimer,cExp=savedGame["charAttr"]
+    app.character=Player(cspeed,cname,cx,cy,cr)
+    app.character.canTrack=cTrack
+    app.character.power=cPower
+    app.character.isInvincible=cInvincible
+    app.character.life=cLife
+    app.character.bomb=cBomb
+    app.character.timer=cTimer
+    app.character.experience=cExp
+    if savedGame["enemyAttr"] is not None:
+        eSpeed,eName,ex,ey,er,eDir,eHealth=savedGame["enemyAttr"]
+        app.enemy=Enemy(eSpeed,eName,eHealth,ex,ey,er)
+        app.enemy.direction=eDir
+    app.bulletList=[]
+    for bulletAttr in savedGame["bulletAttr"]:
+        if bulletAttr is not None:
+            bx,by,bSpeed,bDir,br,bDamage,bLifetime,bFreeze,bGrazed,bTimer=bulletAttr
+            newBullet=bullet(bx,by,bSpeed,bDir,br,bDamage,bLifetime)
+            newBullet.freeze=bFreeze
+            newBullet.grazed=bGrazed
+            newBullet.timer=bTimer
+        app.bulletList.append(newBullet)
+    app.playerBullet=[]
+    for pBulletAttr in savedGame["playerBulletAttr"]:
+        if pBulletAttr is not None:
+            px,py,pSpeed,pDir,pr,pDamage,pLifetime,pTrack=pBulletAttr
+            newPBullet=playerShot(px,py,pSpeed,pDir,pr,pDamage,pLifetime,pTrack)
+            app.playerBulletList.append(newPBullet)
+    app.terrainList=[]
+    for terrainAttr in savedGame["terrainAttr"]:
+        if terrainAttr is not None:
+            tx,ty,tr=terrainAttr
+            app.terrainList.append(circularTerrain(tx,ty,tr))
+    app.powerupList=[]
+    for powerupAttr in savedGame["powerupAttr"]:
+        if powerupAttr is not None:
+            ux,uy,us,up=powerupAttr
+            app.powerupList.append(powerup(ux,uy,us,up))
+    savedGame.close()
+    
 def checkMovements(app):
     cx=app.character.x
     cy=app.character.y
@@ -259,7 +340,7 @@ def stage1(app):
                 bossBullet(app,3,5,5)
             if 20000<=app.timePassed<=23000:
                 if app.timePassed%600==0:
-                    pattern1(app.enemy.x,app.enemy.y,5,5,2,1,114514,random.randint(-10,10),app)
+                    pattern1(app.enemy.x,app.enemy.y,6,5,2,1,114514,random.randint(-10,10),app)
             if 23000<app.timePassed<30000:
                 if app.timePassed%75==0:
                     bossBullet(app,3,5,5)
@@ -270,7 +351,7 @@ def stage1(app):
                     app.xyList=[]
                     for i in range(10):
                         app.xyList.append((100+i*40+random.randint(-10,10),100+random.randint(-20,20)))
-                pattern2(app,app.xyList,5,90,5,1,114,100,50)
+                pattern2(app,app.xyList,5,90,5,1,114514,100,50)
         else:
             #reset stage
             app.stage=2
@@ -302,7 +383,7 @@ def stage2(app):
                         app.xyList.append((100+random.randint(-20,20),40*i))
                 pattern2(app,app.xyList,3,0,4,1,114514,100,50)
                 if app.timePassed%500==0:
-                    pattern1(app.enemy.x,app.enemy.y,3,4,3,1,114514,random.randint(-20,20),app)
+                    pattern1(app.enemy.x,app.enemy.y,5,4,3,1,114514,random.randint(-20,20),app)
         else:
             #reset stage
             app.stage=3
@@ -334,7 +415,7 @@ def stage3(app):
                             app.xyList.append((30+35*i+random.randint(-10,10),100))
                     pattern2(app,app.xyList,2,90,5,10,114514,150,50)
                     if app.timePassed%400==0:
-                        pattern1(app.enemy.x,app.enemy.y,2.5,5,2,10,114514,random.randint(-10,10),app)
+                        pattern1(app.enemy.x,app.enemy.y,5,5,2,10,114514,random.randint(-10,10),app)
         else:
             #ends
             app.mode="End"
@@ -343,7 +424,11 @@ def Start_redrawAll(app,canvas):
     canvas.create_text(300,300,font="Helvetica", text="Press any key to start")
 
 def Start_keyPressed(app,event):
-    app.mode="Game"
+    if event.key=="s":
+        app.mode="Game"
+    elif event.key=="r":
+        readSaveFile(app)
+        app.mode="Game"
 
 def End_redrawAll(app,canvas):
     canvas.create_text(300,300,font="Helvetica",text="Game over!")
@@ -397,9 +482,11 @@ def Market_keyPressed(app,event):
             app.marketMessage=f"Successfully purchased 0.05 power, used {app.powerCost} experience"
             app.character.power+=0.05
             app.character.experience-=app.powerCost
+    elif event.key=="s":
+        saveFile(app)
+        app.marketMessage="Saved game!"
     elif event.key=="m":
         app.mode="Game"
-
 
 def Market_redrawAll(app,canvas):
     canvas.create_text(50,50,font="Helvetica",anchor="nw",text=f"Spendable experience: {app.character.experience}")
@@ -447,5 +534,4 @@ def Game_timerFired(app):
         stage2(app)
     elif app.stage==3:
         stage3(app)
-    print(app.timePassed)
 runApp(height=600,width=800)
