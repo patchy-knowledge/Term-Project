@@ -1,5 +1,4 @@
 from classdec import *
-from cmu_112_graphics import *
 from helper import *
 import random
 
@@ -54,7 +53,6 @@ def clean(app,bulletList,playerBulletList):
         if playerBullet.x>600 or playerBullet.x<0 or playerBullet.y<0 or playerBullet.y>600:
             playerBulletList.remove(playerBullet)
 
-#test only
 def firePlayerBullet(track,app):
     if app.timePassed%30==0:
         for i in range(math.floor(app.character.power)):

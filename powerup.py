@@ -9,6 +9,8 @@ def checkPowerupPickup(powerup,app):
             app.character.isInvincible=True
             app.character.timer=5000
         if powerup.type=="Track":
+            if app.character.canTrack:
+                app.character.experience+=20
             app.character.canTrack=True
         if powerup.type=="Power":
             app.character.power+=0.25

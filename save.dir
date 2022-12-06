@@ -5,7 +5,7 @@
 'marketExtend', (2048, 5)
 'marketBomb', (2560, 5)
 'charAttr', (3072, 67)
-'playerBulletAttr', (3584, 5)
+'playerBulletAttr', (7168, 1096)
 'bulletAttr', (6144, 456)
 'enemyAttr', (4608, 4)
 'terrainAttr', (5120, 25)
