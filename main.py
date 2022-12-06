@@ -1,4 +1,3 @@
-from cmu_112_graphics import *
 from classdec import *
 from bullet import *
 from helper import *
@@ -7,12 +6,24 @@ from powerup import *
 from time import *
 import pygame
 import shelve
-#art assets are from Touhou 8: Imperishable Night
+#art assets are from various Touhou games
+#sprites and shot texture taken from Touhou 8: Imperishable Night
 #retrieved from https://www.spriters-resource.com/download/34544/
 #and https://en.touhouwiki.net/wiki/Category:Imperishable_Night_Images
-
+#start stage background taken from Touhou 7: Perfect Cherry Blossom
+#retrieved from https://en.touhouwiki.net/wiki/Category:Perfect_Cherry_Blossom_Images
+#stage 1 background taken from Touhou 14.5: Urban Legends in Limbo
+#retrieved from https://en.touhouwiki.net/wiki/Category:Urban_Legend_in_Limbo_Images
+#stage 2 background taken from Touhou 13.5: Hopeless Masquerade
+#retrieved from https://en.touhouwiki.net/wiki/Category:Hopeless_Masquerade_Images
+#stage 3 background taken from Touhou 10.5: Scarlet Weather Rhapsody
+#retrieved from https://en.touhouwiki.net/wiki/Category:Scarlet_Weather_Rhapsody_Images
+#ending background taken from Bohemian Archive in Japanese Red
+#retrieved from https://en.touhouwiki.net/wiki/Yuyuko_Saigyouji#Illustrations
+class app:
+    pass
 def appStarted(app):
-    app.timerDelay=10
+    app.timerDelay=5
     app.timePassed=0
     app.bulletList=[]
     app.playerBulletList=[]
@@ -23,53 +34,58 @@ def appStarted(app):
     app.isFocus=False
     app.mode="Start"
     app.cleared=True
-    app.scroll=0
     app.enemy=None
-    app.keyHoldDict=dict()
-    app.keyHoldDict["Up"]=False
-    app.keyHoldDict["Down"]=False
-    app.keyHoldDict["Left"]=False
-    app.keyHoldDict["Right"]=False
     app.score=0
     app.pattern2gen=False
     app.grazeCount=0
     app.pattern2start=None
     app.stage=1
     app.initialized=False
-    loadImage(app)
-    marketInit(app)
-    app.character.experience=114514
+    app.character.experience=50
+    app.marketTick=0
+    app.bombTick=0
+    app.fireTick=0
+    app.focusTick=0
+    app.modeTick=0
+    app.freezeTick=0
+    app.canSkipto2=True
+    app.canSkipto3=True
     pygame.init()
+    pygame.display.init()
+    app.screen=pygame.display.set_mode((800,600))
 
 def loadImage(app):
-    app.characterImage=app.loadImage('Yuyuko_char.png')
-    app.cachedCharacterImage=ImageTk.PhotoImage(app.characterImage)
-    app.enemyImage=app.loadImage('Reimu_enemy.png')
-    app.cachedEnemyImage=ImageTk.PhotoImage(app.enemyImage)
-    app.enemyBulletImage=app.loadImage('Reimu_shot.png')
-    app.cachedEnemyBulletImage=ImageTk.PhotoImage(app.enemyBulletImage)
-    app.stageBackground=app.loadImage('Stage_Background_Alt.png')
-    app.playerBulletImage=app.loadImage('Yuyuko_shot.png')
-    app.cachedPlayerBulletImage=ImageTk.PhotoImage(app.playerBulletImage)
-    app.PowerIcon=app.loadImage('Power.png')
-    app.ExtendIcon=app.loadImage('Extend.png')
-    app.InvincibleIcon=app.loadImage('Invincible.png')
-    app.TrackIcon=app.loadImage('Track.png')
-    app.BombIcon=app.loadImage('Bomb.png')
-    app.cachedPower=ImageTk.PhotoImage(app.PowerIcon)
-    app.cachedExtend=ImageTk.PhotoImage(app.ExtendIcon)
-    app.cachedInvincible=ImageTk.PhotoImage(app.InvincibleIcon)
-    app.cachedTrack=ImageTk.PhotoImage(app.TrackIcon)
-    app.cachedBomb=ImageTk.PhotoImage(app.BombIcon)
-    app.terrainImage=app.loadImage("Rock_img.png")
-    app.cachedTerrain=ImageTk.PhotoImage(app.terrainImage)
+    app.endImage=pygame.image.load('Ending_image.png').convert()
+    app.backgroundImage=pygame.image.load('Hakurei_Background.png').convert()
+    app.startImage=pygame.image.load('Hakugyoukurou_Background.png').convert()
+    app.marketImage=pygame.image.load('Market_image.png').convert()
+    app.playerImage=pygame.image.load('Yuyuko_char.png').convert()
+    app.playerImage.set_colorkey((0,0,0))
+    app.playerShotImage=pygame.image.load('Yuyuko_Shot.png').convert()
+    app.playerShotImage.set_colorkey((0,0,0))
+    app.enemyImage=pygame.image.load('Reimu_enemy.png').convert()
+    app.enemyImage.set_colorkey((0,0,0))
+    app.enemyShotImage=pygame.image.load('Reimu_shot.png').convert()
+    app.enemyShotImage.set_colorkey((0,0,0))
+    app.extendImage=pygame.image.load('Extend.png').convert()
+    app.extendImage.set_colorkey((0,0,0))
+    app.bombImage=pygame.image.load('Bomb.png').convert()
+    app.bombImage.set_colorkey((0,0,0))
+    app.powerImage=pygame.image.load('Power.png').convert()
+    app.powerImage.set_colorkey((0,0,0))
+    app.invincibleImage=pygame.image.load('Invincible.png').convert()
+    app.invincibleImage.set_colorkey((0,0,0))
+    app.trackImage=pygame.image.load('Track.png').convert()
+    app.trackImage.set_colorkey((0,0,0))
+    app.rockImage=pygame.image.load('Rock_img.png').convert()
+    app.rockImage.set_colorkey((0,0,0))
 
 def marketInit(app):
     app.marketExtend=2
     app.marketBomb=5
-    app.trackCost=100
-    app.bombCost=100
-    app.extendCost=100
+    app.trackCost=75
+    app.bombCost=30
+    app.extendCost=60
     app.powerCost=10
     app.marketMessage=""
 
@@ -134,7 +150,7 @@ def readSaveFile(app):
             newBullet.grazed=bGrazed
             newBullet.timer=bTimer
         app.bulletList.append(newBullet)
-    app.playerBullet=[]
+    app.playerBulletList=[]
     for pBulletAttr in savedGame["playerBulletAttr"]:
         if pBulletAttr is not None:
             px,py,pSpeed,pDir,pr,pDamage,pLifetime,pTrack=pBulletAttr
@@ -155,22 +171,23 @@ def readSaveFile(app):
 def checkMovements(app):
     cx=app.character.x
     cy=app.character.y
-    if app.keyHoldDict["Up"] and checkTerrain(app.character,app.terrainList) not in (4,5,7) and not cy<0:
+    keys=pygame.key.get_pressed()
+    if keys[pygame.K_UP] and checkTerrain(app.character,app.terrainList) not in (4,5,7) and not cy<0:
         if app.isFocus:
             app.character.y-=0.3*app.character.speed
         else:
             app.character.y-=app.character.speed
-    if app.keyHoldDict["Down"] and checkTerrain(app.character,app.terrainList) not in (3,6,8) and not cy>app.height:
+    if keys[pygame.K_DOWN] and checkTerrain(app.character,app.terrainList) not in (3,6,8) and not cy>600:
         if app.isFocus:
             app.character.y+=0.3*app.character.speed
         else:
             app.character.y+=app.character.speed
-    if app.keyHoldDict["Left"] and checkTerrain(app.character,app.terrainList) not in (2,5,6) and not cx<0:
+    if keys[pygame.K_LEFT] and checkTerrain(app.character,app.terrainList) not in (2,5,6) and not cx<0:
         if app.isFocus:
             app.character.x-=0.3*app.character.speed
         else:
             app.character.x-=app.character.speed
-    if app.keyHoldDict["Right"] and checkTerrain(app.character,app.terrainList) not in (1,7,8) and not cx>0.75*app.width:
+    if keys[pygame.K_RIGHT] and checkTerrain(app.character,app.terrainList) not in (1,7,8) and not cx>600:
         if app.isFocus:
             app.character.x+=0.3*app.character.speed
         else:
@@ -197,7 +214,7 @@ def bulletTick(app):
     for Bullet in app.bulletList:
         Bullet.lifetime-=app.timerDelay
         if Bullet.lifetime<=0:
-            pattern1(Bullet.x,Bullet.y,3,5,3,1,114514,0,app)
+            pattern1(Bullet.x,Bullet.y,6,5,3,1,114514,0,app)
             app.bulletList.remove(Bullet)
         if not Bullet.freeze:
             dx,dy=polar2cart(Bullet.direction,Bullet.speed)
@@ -210,9 +227,11 @@ def bulletTick(app):
                 app.character.timer=2000
                 if app.character.life==0:
                     app.mode="End"
+                    app.victory=False
         if checkGraze(app.character,Bullet) and not Bullet.grazed:
             Bullet.grazed=True
             app.grazeCount+=1
+            app.character.experience+=1
         if Bullet.timer is not None:
             if Bullet.timer<=0:
                 if Bullet.freeze:
@@ -288,52 +307,81 @@ def powerupTick(app):
         Powerup.y+=Powerup.speed
         checkPowerupPickup(Powerup,app)
         
-def drawPowerups(app,canvas):
+def drawPowerups(app):
     for powerup in app.powerupList:
         if powerup.type=="Invincible":
-            canvas.create_image(powerup.x,powerup.y,image=app.cachedInvincible)
+            app.screen.blit(app.invincibleImage,(powerup.x-powerup.r,powerup.y-powerup.r))
         elif powerup.type=="Bomb":
-            canvas.create_image(powerup.x,powerup.y,image=app.cachedBomb)
+            app.screen.blit(app.bombImage,(powerup.x-powerup.r,powerup.y-powerup.r))
         elif powerup.type=="Track":
-            canvas.create_image(powerup.x,powerup.y,image=app.cachedTrack)
+            app.screen.blit(app.trackImage,(powerup.x-powerup.r,powerup.y-powerup.r))
         elif powerup.type=="Extend":
-            canvas.create_image(powerup.x,powerup.y,image=app.cachedExtend)
+            app.screen.blit(app.extendImage,(powerup.x-powerup.r,powerup.y-powerup.r))
         elif powerup.type=="Power":
-            canvas.create_image(powerup.x,powerup.y,image=app.cachedPower)
+            app.screen.blit(app.powerImage,(powerup.x-powerup.r,powerup.y-powerup.r))
+    
+def drawScore(app):
+    font=pygame.font.SysFont('Arial',24)
+    scoretext=f"Score: {app.score}"
+    grazetext=f"Graze: {app.grazeCount}"
+    exptext=f"Experience: {app.character.experience}"
+    powertext=f"Power: {app.character.power}"
+    lifetext=f"Remaining Life: {app.character.life}"
+    bombtext=f"Remaining Bomb: {app.character.bomb}"
+    invincibletext=f"Invincible: {app.character.isInvincible}"
+    invincibletimertext=f"Invincible time: {app.character.timer}"
+    timertext1=f"Stage: {app.stage}"
+    timertext2=f"timePassed: {app.timePassed}"
+    scoreObj=font.render(scoretext,True,(0,0,0))
+    grazeObj=font.render(grazetext,True,(0,0,0))
+    expObj=font.render(exptext,True,(0,0,0))
+    powerObj=font.render(powertext,True,(0,0,0))
+    lifeObj=font.render(lifetext,True,(0,0,0))
+    bombObj=font.render(bombtext,True,(0,0,0))
+    invincibleObj=font.render(invincibletext,True,(0,0,0))
+    invincibletimerObj=font.render(invincibletimertext,True,(0,0,0))
+    timerObj1=font.render(timertext1,True,(0,0,0))
+    timerObj2=font.render(timertext2,True,(0,0,0))
+    app.screen.blit(scoreObj,(610,100))
+    app.screen.blit(grazeObj,(610,130))
+    app.screen.blit(powerObj,(610,160))
+    app.screen.blit(expObj,(610,190))
+    app.screen.blit(lifeObj,(610,260))
+    app.screen.blit(bombObj,(610,290))
+    app.screen.blit(invincibleObj,(610,320))
+    app.screen.blit(invincibletimerObj,(610,350))
+    app.screen.blit(timerObj1,(610,450))
+    app.screen.blit(timerObj2,(610,480))
 
-def drawScore(app,canvas):
-    canvas.create_text(650,50,font='Arial 20',text=f"Score\n {app.score}")
-    canvas.create_text(650,150,font='Arial 20',text=f"Graze\n {app.grazeCount}")
-    canvas.create_text(650,250,font='Arial 20',text=f"Life\n {app.character.life} {app.character.isInvincible}")
-    canvas.create_text(650,350,font='Arial 20',text=f"Bomb\n {app.character.bomb}")
-    canvas.create_text(650,450,font='Arial 20',text=f"Timers: {app.timePassed} {app.character.timer}")
-
-def drawTerrain(app,canvas):
+def drawTerrain(app):
     for terrain in app.terrainList:
         if isinstance(terrain,rectTerrain):
             pass
-        elif isinstance(terrain,circularTerrain):
-            canvas.create_image(terrain.x,terrain.y,image=app.cachedTerrain)
+        elif isinstance(terrain,circularTerrain):    
+            app.screen.blit(app.rockImage,(terrain.x-terrain.r,terrain.y-terrain.r))
 
-def drawCharacters(app,canvas):
-    canvas.create_image(app.character.x,app.character.y,image=app.cachedCharacterImage)
-    canvas.create_oval(app.character.x-app.character.radius,app.character.y-app.character.radius,
-    app.character.x+app.character.radius,app.character.y+app.character.radius,fill="white")
+def drawCharacters(app):
+    offsetX=0.5*app.playerImage.get_width()
+    offsetY=0.5*app.playerImage.get_height()
+    enemyOffsetX=0.5*app.enemyImage.get_width()
+    enemyOffsetY=0.5*app.enemyImage.get_height()
+    app.screen.blit(app.playerImage,(app.character.x-offsetX,app.character.y-offsetY))
+    pygame.draw.circle(app.screen,(255,255,255),(app.character.x,app.character.y),app.character.radius)
     if app.enemy is not None:
-        canvas.create_image(app.enemy.x,app.enemy.y,image=app.cachedEnemyImage)
+        app.screen.blit(app.enemyImage,(app.enemy.x-enemyOffsetX,app.enemy.y-enemyOffsetY))
 
-def drawBullets(app,canvas):
+def drawBullets(app):
     for bullet in app.bulletList:
-        canvas.create_image(bullet.x,bullet.y,image=app.cachedEnemyBulletImage)
+        app.screen.blit(app.enemyShotImage,(bullet.x-bullet.radius,bullet.y-bullet.radius))
     for playerBullet in app.playerBulletList:
-        canvas.create_image(playerBullet.x,playerBullet.y,image=app.cachedPlayerBulletImage)
+        app.screen.blit(app.playerShotImage,(playerBullet.x-playerBullet.radius,playerBullet.y-playerBullet.radius))
 
 def stage1(app):
     if app.timePassed<15000:
         if app.timePassed%100==0:
             randomBullet(app,2,5,1,114514)
     elif 15000<=app.timePassed<=15050: 
-        app.enemy=Enemy(2,"Hakurei Reimu",191981,300,50,10)
+        app.enemy=Enemy(2,"Hakurei Reimu",114514,300,50,10)
     elif app.timePassed>15050:
         if app.enemy is not None:
             if app.timePassed%100==0:
@@ -361,15 +409,16 @@ def stage1(app):
 
 def stage2(app):
     if not app.initialized:
-        app.enemyImage=app.loadImage('Marisa_enemy.png')
-        app.enemyBulletImage=app.loadImage('Marisa_shot.png')
-        app.cachedEnemyImage=ImageTk.PhotoImage(app.enemyImage)
-        app.cachedEnemyBulletImage=ImageTk.PhotoImage(app.enemyBulletImage)
+        app.backgroundImage=pygame.image.load('Human_Village_Background.png').convert()
+        app.enemyImage=pygame.image.load('Marisa_enemy.png').convert()
+        app.enemyShotImage=pygame.image.load('Marisa_shot.png').convert()
+        app.enemyImage.set_colorkey((0,0,0))
+        app.enemyShotImage.set_colorkey((0,0,0))
     if app.timePassed<20000:
         if app.timePassed%75==0:
             randomBullet(app,4,4,10,114514)
     elif 20000<app.timePassed<20050:
-        app.enemy=Enemy(3,"Kirisame Marisa",114514,300,50,10)
+        app.enemy=Enemy(3,"Kirisame Marisa",220000,300,50,10)
     elif app.timePassed>20050:
         if app.enemy is not None:
             if app.timePassed%66==0:
@@ -383,7 +432,7 @@ def stage2(app):
                         app.xyList.append((100+random.randint(-20,20),40*i))
                 pattern2(app,app.xyList,3,0,4,1,114514,100,50)
                 if app.timePassed%500==0:
-                    pattern1(app.enemy.x,app.enemy.y,5,4,3,1,114514,random.randint(-20,20),app)
+                    pattern1(app.enemy.x,app.enemy.y,5,4,3,1,114514,0,app)
         else:
             #reset stage
             app.stage=3
@@ -393,145 +442,274 @@ def stage2(app):
 
 def stage3(app):
     if not app.initialized:
-        app.enemyImage=app.loadImage('Tenshi_enemy.png')
-        app.enemyBulletImage=app.loadImage('Tenshi_shot.png')
-        app.cachedEnemyImage=ImageTk.PhotoImage(app.enemyImage)
-        app.cachedEnemyBulletImage=ImageTk.PhotoImage(app.enemyBulletImage)
+        app.backgroundImage=pygame.image.load('Youkai_Mountain_Background.png').convert()
+        app.enemyImage=pygame.image.load('Tenshi_enemy.png').convert()
+        app.enemyShotImage=pygame.image.load('Tenshi_shot.png').convert()
+        app.enemyImage.set_colorkey((0,0,0))
+        app.enemyShotImage.set_colorkey((0,0,0))
     if app.timePassed<15000:
-        if app.timePassed%66==0:
+        if app.timePassed%60==0:
             randomBullet(app,2,5,1,114514)
-        elif 15000<=app.timePassed<=15050:
-            app.enemy=Enemy(1.5,"Hinanawi Tenshi",198893,300,50,10)
-        elif app.timePassed>15050:
-            if app.enemy is not None:
-                if app.timePassed%50==0:
-                    bossBullet(app,3,5,5)
-                if 20000<app.timePassed<25000 or 30000<app.timePassed<35000:
-                    if app.pattern2start is None:
-                        app.pattern2start=app.timePassed
-                        app.pattern2gencount=0
-                        app.xyList=[]
-                        for i in range(15):
-                            app.xyList.append((30+35*i+random.randint(-10,10),100))
-                    pattern2(app,app.xyList,2,90,5,10,114514,150,50)
-                    if app.timePassed%400==0:
-                        pattern1(app.enemy.x,app.enemy.y,5,5,2,10,114514,random.randint(-10,10),app)
+    elif 15000<=app.timePassed<=15050:
+        app.enemy=Enemy(1.5,"Hinanawi Tenshi",300000,300,50,10)
+    elif app.timePassed>15050:
+        if app.enemy is not None:
+            if app.timePassed%50==0:
+                bossBullet(app,3,5,5)
+            if 20000<app.timePassed<25000 or 30000<app.timePassed<35000:
+                if app.pattern2start is None:
+                    app.pattern2start=app.timePassed
+                    app.pattern2gencount=0
+                    app.xyList=[]
+                    for i in range(15):
+                        app.xyList.append((30+35*i+random.randint(-10,10),100))
+                pattern2(app,app.xyList,2,90,5,10,114514,150,50)
+                if app.timePassed%400==0:
+                    pattern1(app.enemy.x,app.enemy.y,5,5,2,10,114514,random.randint(-10,10),app)
+                    pattern1(50,50,5,5,2,10,114514,0,app)
+                    pattern1(550,50,5,5,2,10,114514,0,app)
         else:
             #ends
+            app.victory=True
             app.mode="End"
             
-def Start_redrawAll(app,canvas):
-    canvas.create_text(300,300,font="Helvetica", text="Press any key to start")
+def Start_redrawAll(app):
+    app.screen.fill("white")
+    app.screen.blit(app.startImage,(0,0))
+    font=pygame.font.SysFont('Arial',24)
+    startimg=font.render('Press S for new game, Press R to read save',True,(0,0,0))
+    titleText=font.render('Touhou 15.112th Project -Python Bugs in Limbo-',True,(0,0,0))
+    startRect=startimg.get_rect(center=(300,300))
+    titleRect=titleText.get_rect(center=(300,340))
+    app.screen.blit(startimg,startRect)
+    app.screen.blit(titleText,titleRect)
+    pygame.display.flip()
 
-def Start_keyPressed(app,event):
-    if event.key=="s":
+def Start_keyPressed(app):
+    keys=pygame.key.get_pressed()
+    if keys[pygame.K_s]:
         app.mode="Game"
-    elif event.key=="r":
+    elif keys[pygame.K_r]:
         readSaveFile(app)
         app.mode="Game"
 
-def End_redrawAll(app,canvas):
-    canvas.create_text(300,300,font="Helvetica",text="Game over!")
-    canvas.create_text(300,375,font="Helvetica",text=f"Damage score: {app.score}, Graze: {app.grazeCount}")
-    canvas.create_text(300,450,font="Helvetica",text=f"Total score: {app.score+25*app.grazeCount}")
+def End_redrawAll(app):
+    app.screen.blit(app.endImage,(0,0))
+    font=pygame.font.SysFont('Helvetica',30)
+    if app.victory:
+        message="You made it!"
+        extra="Yuyuko beat Reimu, Marisa, and Tenshi!"
+    else:
+        message="Game Over!"
+        extra=None
+    endmsg1=font.render(message,None,(0,0,0))
+    if extra is not None:
+        extramsg=font.render(extra,None,(0,0,0))
+    endmsg2=font.render(f'Damage score: {app.score}, Graze: {app.grazeCount}',None,(0,0,0))
+    endmsg3=font.render(f'Total score: {app.score+25*app.grazeCount}',None,(0,0,0))
+    endRect1=endmsg1.get_rect(center=(300,250))
+    if extra is not None:
+        extraRect=extramsg.get_rect(center=(300,290))
+    endRect2=endmsg2.get_rect(center=(300,350))
+    endRect3=endmsg3.get_rect(center=(300,400))
+    app.screen.blit(endmsg1,endRect1)
+    if extra is not None:
+        app.screen.blit(extramsg,extraRect)
+    app.screen.blit(endmsg2,endRect2)
+    app.screen.blit(endmsg3,endRect3)
 
-def Game_redrawAll(app,canvas):
-    canvas.create_image(300,300,image=ImageTk.PhotoImage(app.stageBackground))
-    drawTerrain(app,canvas)
-    drawCharacters(app,canvas)
+def Game_redrawAll(app):
+    app.screen.blit(app.backgroundImage,(0,0))
+    blankRect=(600,0,200,600)
+    pygame.draw.rect(app.screen,(255,255,255),blankRect)
+    drawTerrain(app)
+    drawCharacters(app)
     if app.enemy is not None:
-        canvas.create_text(300,50,font="Arial 26", text=app.enemy.health)
-    drawBullets(app,canvas)
-    drawScore(app,canvas)
-    drawPowerups(app,canvas)
+        font=pygame.font.SysFont('Helvetica',36)
+        if app.stage==1:
+            healthmsg=font.render(str(app.enemy.health),True,(255,255,255))
+        else:
+            healthmsg=font.render(str(app.enemy.health),True,(0,0,0))
+        healthrect=healthmsg.get_rect(center=(300,50))
+        app.screen.blit(healthmsg,healthrect)
+    drawBullets(app)
+    drawScore(app)
+    drawPowerups(app)
+    pygame.display.flip()
 
-def Market_keyPressed(app,event):
-    if event.key=="1":
-        if app.character.canTrack:
-            app.marketMessage="Tracking ability already obtained"
-        elif app.character.experience//app.trackCost==0:
-            app.marketMessage="Not enough experience!"
-        else:
-            app.marketMessage=f"Successfully purchased tracking ability, used {app.trackCost} experience"
-            app.character.canTrack=True
-            app.character.experience-=app.trackCost
-    elif event.key=="2":
-        if app.marketBomb<=0:
-            app.marketMessage="Sold out!"
-        elif app.character.experience//app.bombCost==0:
-            app.marketMessage="Not enough experience!"
-        else:
-            app.marketMessage=f"Successfully purchased bomb, used {app.bombCost} experience"
-            app.character.bomb+=1
-            app.marketBomb-=1
-            app.character.experience-=app.bombCost
-    elif event.key=="3":
-        if app.marketExtend<=0:
-            app.marketMessage="Sold out!"
-        elif app.character.experience//app.extendCost==0:
-            app.marketMessage="Not enough experience!"
-        else:
-            app.marketMessage=f"Successfully purchased extra life, used {app.extendCost} experience"
-            app.character.life+=1
-            app.marketExtend-=1
-            app.character.experience-=app.extendCost
-    elif event.key=="4":
-        if app.character.experience//app.powerCost==0:
-            app.marketMessage="Not enough experience!"
-        else:
-            app.marketMessage=f"Successfully purchased 0.05 power, used {app.powerCost} experience"
-            app.character.power+=0.05
-            app.character.experience-=app.powerCost
-    elif event.key=="s":
-        saveFile(app)
-        app.marketMessage="Saved game!"
-    elif event.key=="m":
-        app.mode="Game"
+def Market_keyPressed(app):
+    keys=pygame.key.get_pressed()
+    if app.marketTick<=0:
+        if keys[pygame.K_1]:
+            app.marketTick=15
+            if app.character.canTrack:
+                app.marketMessage="Tracking ability already obtained"
+            elif app.character.experience//app.trackCost==0:
+                 app.marketMessage="Not enough experience!"
+            else:
+                app.marketMessage=f"Successfully purchased tracking ability, used {app.trackCost} experience"
+                app.character.canTrack=True
+                app.character.experience-=app.trackCost
+        if keys[pygame.K_2]:
+            app.marketTick=15
+            if app.marketBomb<=0:
+                app.marketMessage="Sold out!"
+            elif app.character.experience//app.bombCost==0:
+                app.marketMessage="Not enough experience!"
+            else:
+                app.marketMessage=f"Successfully purchased bomb, used {app.bombCost} experience"
+                app.character.bomb+=1
+                app.marketBomb-=1
+                app.character.experience-=app.bombCost
+        if keys[pygame.K_3]:
+            app.marketTick=15
+            if app.marketExtend<=0:
+                app.marketMessage="Sold out!"
+            elif app.character.experience//app.extendCost==0:
+                app.marketMessage="Not enough experience!"
+            else:
+                app.marketMessage=f"Successfully purchased extra life, used {app.extendCost} experience"
+                app.character.life+=1
+                app.marketExtend-=1
+                app.character.experience-=app.extendCost
+        if keys[pygame.K_4]:
+            app.marketTick=15
+            if app.character.experience//app.powerCost==0:
+                app.marketMessage="Not enough experience!"
+            else:
+                app.marketMessage=f"Successfully purchased 0.05 power, used {app.powerCost} experience"
+                app.character.power+=0.05
+                app.character.experience-=app.powerCost
+        if keys[pygame.K_s]:
+            app.marketTick=15
+            saveFile(app)
+            app.marketMessage="Saved game!"
+        if keys[pygame.K_m] and app.modeTick<=0:
+            app.modeTick=15
+            app.mode="Game"
 
-def Market_redrawAll(app,canvas):
-    canvas.create_text(50,50,font="Helvetica",anchor="nw",text=f"Spendable experience: {app.character.experience}")
+def Market_redrawAll(app):
+    app.screen.blit(app.marketImage,(0,0))
+    blankRect=pygame.Rect(600,0,200,600)
+    pygame.draw.rect(app.screen,(255,255,255),blankRect)
     trackcount=0
     if not app.character.canTrack: trackcount=1
-    canvas.create_text(50,80,font="Helvetica",anchor="nw",text=f"1. Tracking ability: remaining {trackcount}, cost {app.trackCost}, available {min(trackcount,app.character.experience//app.trackCost)}")
-    canvas.create_text(50,110,font="Helvetica",anchor="nw",text=f"2. Extra bomb: remaining {app.marketBomb}, cost {app.bombCost}, available {min(app.marketBomb,app.character.experience//app.bombCost)}")
-    canvas.create_text(50,140,font="Helvetica",anchor="nw",text=f"3. Extra life: remaining {app.marketExtend}, cost {app.extendCost}, available {min(app.marketExtend,app.character.experience//app.extendCost)}")
-    canvas.create_text(50,170,font="Helvetica",anchor="nw",text=f"4. Power up 0.05, current power {app.character.power}, cost {app.powerCost}, available {app.character.experience//app.powerCost}")
-    canvas.create_text(50,500,font="Helvetica",anchor="nw",text=app.marketMessage)
-def Game_keyPressed(app,event):
-    if event.key=="Space":
-        app.character.isFiring=not app.character.isFiring
-    if event.key=="z":
-        app.isFocus=not app.isFocus
-    if event.key=="f":
-        freeze(app,app.character.x,app.character.y-80,80)
-    if event.key=="x":
-        bomb(app)
-    if event.key in ("Up","Down","Left","Right"):
-        app.keyHoldDict[event.key]=True
-    if event.key=="m":
-        app.mode="Market"
-        
-def Game_keyReleased(app,event):
-    if event.key in ("Up","Down","Left","Right"):
-        app.keyHoldDict[event.key]=False
+    font=pygame.font.SysFont('Helvetica',26)
+    expmsg=f"Remaining experience: {app.character.experience}"
+    marketmsg1=f"1. Tracking ability: remaining {trackcount}, cost {app.trackCost}, available {min(trackcount,app.character.experience//app.trackCost)}"
+    marketmsg2=f"2. Extra bomb: remaining {app.marketBomb}, cost {app.bombCost}, available {min(app.marketBomb,app.character.experience//app.bombCost)}"
+    marketmsg3=f"3. Extra life: remaining {app.marketExtend}, cost {app.extendCost}, available {min(app.marketExtend,app.character.experience//app.extendCost)}"
+    marketmsg4=f"4. Power up, current power {app.character.power}, cost {app.powerCost}, available {app.character.experience//app.powerCost}"
+    marketExtraMsgObj=font.render(app.marketMessage,True,(0,0,255))
+    marketmsg1Obj=font.render(marketmsg1,True,(0,0,255))
+    marketmsg2Obj=font.render(marketmsg2,True,(0,0,255))
+    marketmsg3Obj=font.render(marketmsg3,True,(0,0,255))
+    marketmsg4Obj=font.render(marketmsg4,True,(0,0,255))
+    expmsgObj=font.render(expmsg,True,(0,0,255))
+    app.screen.blit(expmsgObj,(20,50))
+    app.screen.blit(marketmsg1Obj,(20,200))
+    app.screen.blit(marketmsg2Obj,(20,230))
+    app.screen.blit(marketmsg3Obj,(20,260))
+    app.screen.blit(marketmsg4Obj,(20,290))
+    app.screen.blit(marketExtraMsgObj,(20,500))
+    pygame.display.flip()
+
+def Game_keyPressed(app):
+    keys=pygame.key.get_pressed()
+    if keys[pygame.K_SPACE]:
+        if app.fireTick<=0:
+            app.fireTick=15
+            app.character.isFiring=not app.character.isFiring
+    if keys[pygame.K_z]:
+        if app.focusTick<=0:
+            app.focusTick=15
+            app.isFocus=not app.isFocus
+    if keys[pygame.K_f]:
+        if app.freezeTick<=0:
+            app.freezeTick=120
+            freeze(app,app.character.x,app.character.y-80,80)
+    if keys[pygame.K_x]:
+        if app.bombTick<=0:
+            app.bombTick=15
+            bomb(app)
+    if keys[pygame.K_m]:
+        if app.modeTick<=0:
+            app.modeTick=15
+            app.mode="Market"
+    if keys[pygame.K_2] and app.canSkipto2:
+        app.stage=2
+        app.timePassed=0
+        app.pattern2start=None
+        app.initialized=False
+        app.canSkipto2=False
+    if keys[pygame.K_3] and app.canSkipto3:
+        app.stage=3
+        app.timePassed=0
+        app.pattern2start=None
+        app.initialized=False
+        app.canSkipto3=False
         
 def Game_timerFired(app):
     app.timePassed+=app.timerDelay
     if app.enemy is not None:
         enemyTick(app)
+    Game_keyPressed(app)
+    Game_redrawAll(app)
     checkMovements(app)
     if app.character.isFiring:
-        firePlayerBullet(app.character.canTrack,app)
+        firePlayerBullet(app.character.canTrack or app.isFocus,app)
     characterTick(app)
     powerupTick(app)
     bulletTick(app)
     playerBulletTick(app)
     terrainTick(app)
     clean(app,app.bulletList,app.playerBulletList) 
+    if app.bombTick>0:
+        app.bombTick-=1
+    if app.modeTick>0:
+        app.modeTick-=1
+    if app.freezeTick>0:
+        app.freezeTick-=1
+    if app.focusTick>0:
+        app.focusTick-=1
+    if app.fireTick>0:
+        app.fireTick-=1
     if app.stage==1:
         stage1(app)
     elif app.stage==2:
         stage2(app)
     elif app.stage==3:
         stage3(app)
-runApp(height=600,width=800)
+
+def main(app):
+    appStarted(app)
+    loadImage(app)
+    marketInit(app)
+    clock=pygame.time.Clock()
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+        multipliedPower=app.character.power*100
+        multipliedPower=round(multipliedPower)
+        app.character.power=multipliedPower/100
+        if app.mode=="Start":
+            Start_redrawAll(app)
+            Start_keyPressed(app)
+        elif app.mode=="Game":
+            app.marketTick=0
+            Game_timerFired(app)
+        elif app.mode=="Market":
+            Market_redrawAll(app)
+            Market_keyPressed(app)
+            if app.marketTick>0:
+                app.marketTick-=1
+            if app.modeTick>0:
+                app.modeTick-=1
+        elif app.mode=="End":
+            End_redrawAll(app)
+        pygame.display.update()
+        clock.tick(60)
+
+main(app)
