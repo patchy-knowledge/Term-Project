@@ -377,6 +377,9 @@ def drawBullets(app):
         app.screen.blit(app.playerShotImage,(playerBullet.x-playerBullet.radius,playerBullet.y-playerBullet.radius))
 
 def stage1(app):
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.load('Reimu_Theme.mp3')
+        pygame.mixer.music.play(loops=-1)
     if app.timePassed<15000:
         if app.timePassed%100==0:
             randomBullet(app,2,5,1,114514)
@@ -406,6 +409,7 @@ def stage1(app):
             app.timePassed=0
             app.pattern2start=None
             app.initialized=False
+            pygame.mixer.music.unload()
 
 def stage2(app):
     if not app.initialized:
@@ -414,6 +418,9 @@ def stage2(app):
         app.enemyShotImage=pygame.image.load('Marisa_shot.png').convert()
         app.enemyImage.set_colorkey((0,0,0))
         app.enemyShotImage.set_colorkey((0,0,0))
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.load('Marisa_Theme.mp3')
+        pygame.mixer.music.play(loops=-1)
     if app.timePassed<20000:
         if app.timePassed%75==0:
             randomBullet(app,4,4,10,114514)
@@ -439,6 +446,7 @@ def stage2(app):
             app.timePassed=0
             app.pattern2start=None
             app.initialized=False
+            pygame.mixer.music.unload()
 
 def stage3(app):
     if not app.initialized:
@@ -447,6 +455,9 @@ def stage3(app):
         app.enemyShotImage=pygame.image.load('Tenshi_shot.png').convert()
         app.enemyImage.set_colorkey((0,0,0))
         app.enemyShotImage.set_colorkey((0,0,0))
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.load('Tenshi_Theme.mp3')
+        pygame.mixer.music.play(loops=-1)
     if app.timePassed<15000:
         if app.timePassed%60==0:
             randomBullet(app,2,5,1,114514)
@@ -454,7 +465,7 @@ def stage3(app):
         app.enemy=Enemy(1.5,"Hinanawi Tenshi",300000,300,50,10)
     elif app.timePassed>15050:
         if app.enemy is not None:
-            if app.timePassed%50==0:
+            if app.timePassed%50==0 and not 20000<app.timePassed<25000 and not 30000<app.timePassed<35000:
                 bossBullet(app,3,5,5)
             if 20000<app.timePassed<25000 or 30000<app.timePassed<35000:
                 if app.pattern2start is None:
@@ -465,13 +476,14 @@ def stage3(app):
                         app.xyList.append((30+35*i+random.randint(-10,10),100))
                 pattern2(app,app.xyList,2,90,5,10,114514,150,50)
                 if app.timePassed%400==0:
-                    pattern1(app.enemy.x,app.enemy.y,5,5,2,10,114514,random.randint(-10,10),app)
-                    pattern1(50,50,5,5,2,10,114514,0,app)
-                    pattern1(550,50,5,5,2,10,114514,0,app)
+                    pattern1(app.enemy.x,app.enemy.y,5,5,1,10,114514,random.randint(-10,10),app)
+                    pattern1(50,50,5,5,1,10,114514,0,app)
+                    pattern1(550,50,5,5,1,10,114514,0,app)
         else:
             #ends
             app.victory=True
             app.mode="End"
+            pygame.mixer.music.unload()
             
 def Start_redrawAll(app):
     app.screen.fill("white")
@@ -642,12 +654,14 @@ def Game_keyPressed(app):
         app.pattern2start=None
         app.initialized=False
         app.canSkipto2=False
+        pygame.mixer.music.unload()
     if keys[pygame.K_3] and app.canSkipto3:
         app.stage=3
         app.timePassed=0
         app.pattern2start=None
         app.initialized=False
         app.canSkipto3=False
+        pygame.mixer.music.unload()
         
 def Game_timerFired(app):
     app.timePassed+=app.timerDelay
