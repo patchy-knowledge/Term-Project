@@ -1,6 +1,6 @@
-# Term-Project
+# Fall 2022 15-112 Term Project: Touhou 15.112 ~ Python Bugs in Limbo ~
 
-Fall 2022 15-112 Term Project: Touhou 15.112 ~ Python Bugs in Limbo ~
+Touhou-style bullet hell game. 
 
 # How to use:
 
