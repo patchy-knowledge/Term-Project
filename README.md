@@ -2,11 +2,13 @@
 
 Fall 2022 15-112 Term Project: Touhou 15.112 ~ Python Bugs in Limbo ~
 
-How to use:
+# How to use:
 
 Install Pygame and Shelve.
 
 Download ALL files from this repos and run main.py. Use arrow keys to move, z to toggle focus mode, space to toggle firing, and m to open market/save game progress.
+
+# Copyright stuff:
 
 Art assets are from various Touhou games, used under copyright policies of Team Shanghai Alice and Twilight Frontier
 
